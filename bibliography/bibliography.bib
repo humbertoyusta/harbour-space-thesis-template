@@ -1,20 +1,397 @@
 @article{reference-1,
-  author  = "Ipsum, Lorem",
-  title   = "Dolor Sit Amet: Consectetur Adipiscing Elit",
-  journal = "Vestibulum Enim Revista",
-  year    = 2017,
+  author = {Kunjir, Mayuresh and Fain, Brandon and Munagala, Kamesh and Babu, Shivnath},
+  title = {ROBUS: Fair Cache Allocation for Data-parallel Workloads},
+  year = {2017},
+  isbn = {9781450341974},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3035918.3064018},
+  doi = {10.1145/3035918.3064018},
+  abstract = {Systems for processing big data---e.g., Hadoop, Spark, and massively parallel databases---need to run workloads on behalf of multiple tenants simultaneously. The abundant disk-based storage in these systems is usually complemented by a smaller, but much faster, cache. Cache is a precious resource: Tenants who get to use the cache can see two orders of magnitude performance improvement. Cache is also a limited and hence shared resource: Unlike a resource like a CPU core which can be used by only one tenant at a time, a cached data item can be accessed by multiple tenants at the same time. Cache, therefore, has to be shared by a multi-tenancy-aware policy across tenants, each having a unique set of priorities and workload characteristics.In this paper, we develop cache allocation strategies that speed up the overall workload while being fair to each tenant. We build a novel fairness model targeted at the shared resource setting that incorporates not only the more standard concepts of Pareto-efficiency and sharing incentive, but we also define envy freeness via the notion of core from cooperative game theory. Our cache management platform, ROBUS, uses randomization over small time batches, and we develop a proportionally fair allocation mechanism that satisfies the core property in expectation. We show that this algorithm and related fair algorithms can be approximated to arbitrary precision in polynomial time. We evaluate these algorithms on a ROBUS prototype implemented on Spark with RDD store used as cache. Our evaluation on an industry-standard workload shows that our algorithms score high on both performance and fairness metrics across a wide variety of practical multi-tenant setups.},
+  booktitle = {Proceedings of the 2017 ACM International Conference on Management of Data},
+  pages = {219-234},
+  numpages = {16},
+  keywords = {cache management, data analytics, multi-tenancy, proportional fairness},
+  location = {Chicago, Illinois, USA},
+  series = {SIGMOD '17}
 }
 
 @article{reference-2,
-  author  = "Ipsum, L.",
-  title   = "Sed Do Eiusmod Tempor: Incididunt Ut Labore",
-  journal = "Et Dolore Magna Aliqua",
-  year    = 2018,
+  author = {Lykouris, Thodoris and Vassilvitskii, Sergei},
+  title = {Competitive Caching with Machine Learned Advice},
+  year = {2021},
+  issue_date = {August 2021},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {68},
+  number = {4},
+  issn = {0004-5411},
+  url = {https://doi.org/10.1145/3447579},
+  doi = {10.1145/3447579},
+  abstract = {Traditional online algorithms encapsulate decision making under uncertainty, and give ways to hedge against all possible future events, while guaranteeing a nearly optimal solution, as compared to an offline optimum. On the other hand, machine learning algorithms are in the business of extrapolating patterns found in the data to predict the future, and usually come with strong guarantees on the expected generalization error.In this work, we develop a framework for augmenting online algorithms with a machine learned predictor to achieve competitive ratios that provably improve upon unconditional worst-case lower bounds when the predictor has low error. Our approach treats the predictor as a complete black box and is not dependent on its inner workings or the exact distribution of its errors.We apply this framework to the traditional caching problem—creating an eviction strategy for a cache of size k. We demonstrate that naively following the oracle’s recommendations may lead to very poor performance, even when the average error is quite low. Instead, we show how to modify the Marker algorithm to take into account the predictions and prove that this combined approach achieves a competitive ratio that both (i) decreases as the predictor’s error decreases and (ii) is always capped by O(log k), which can be achieved without any assistance from the predictor. We complement our results with an empirical evaluation of our algorithm on real-world datasets and show that it performs well empirically even when using simple off-the-shelf predictions.},
+  journal = {J. ACM},
+  month = {07},
+  articleno = {24},
+  numpages = {25},
+  keywords = {beyond worst-case analysis, paging, machine learned predictions, Online algorithms}
 }
 
 @article{reference-3,
-  author  = "Ipsum, L. D.",
-  title   = "Ut Enim Ad Minim Veniam: Quis Nostrud Exercitation",
-  journal = "Ullamco Laboris Nisi",
-  year    = 2019,
+  author = {Basiuk, Taras and Gruenwald, Le and d'Orazio, Laurent and Leal, Eleazar},
+  year = {2020},
+  month = {04},
+  pages = {121-126},
+  title = {A Persistent Memory-Aware Buffer Pool Manager Simulator for Multi-Tenant Cloud Databases},
+  doi = {10.1109/ICDEW49219.2020.00011}
 }
+
+@article{reference-4,
+  author = {Narasayya, Vivek and Menache, Ishai and Singh, Mohit and Li, Feng and Sy, Manoj and Chaudhuri, Surajit},
+  year = {2015},
+  month = {02},
+  pages = {726-737},
+  title = {Sharing buffer pool memory in multi-tenant relational database-as-a-service},
+  volume = {8},
+  journal = {Proceedings of the VLDB Endowment},
+  doi = {10.14778/2752939.2752942}
+}
+
+@article{reference-5,
+  author = {Zhu, Zekai and Jin, Peiquan and Wang, Xiaoliang and Yuan, Yigui and Wan, Shouhong},
+  year = {2023},
+  month = {02},
+  pages = {87-94},
+  title = {Adaptive Buffer Replacement Policies for Multi-Tenant Cloud Services},
+  doi = {10.1109/DSDE58527.2023.00024}
+}
+
+@article{reference-6,
+  author = {Xu, Cong and Rajamani, Karthick and Ferreira, Alexandre and Felter, Wesley and Rubio, Juan and Li, Yang},
+  title = {dCat: dynamic cache management for efficient, performance-sensitive infrastructure-as-a-service},
+  year = {2018},
+  isbn = {9781450355841},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3190508.3190555},
+  doi = {10.1145/3190508.3190555},
+  abstract = {In the modern multi-tenant cloud, resource sharing increases utilization but causes performance interference between tenants. More generally, performance isolation is also relevant in any multi-workload scenario involving shared resources. Last level cache (LLC) on processors is shared by all CPU cores in x86, thus the cloud tenants inevitably suffer from the cache flush by their noisy neighbors running on the same socket. Intel Cache Allocation Technology (CAT) provides a mechanism to assign cache ways to cores to enable cache isolation, but its static configuration can result in underutilized cache when a workload cannot benefit from its allocated cache capacity, and/or lead to sub-optimal performance for workloads that do not have enough assigned capacity to fit their working set.In this work, we propose a new dynamic cache management technology (dCat) to provide strong cache isolation with better performance. For each workload, we target a consistent, minimum performance bound irrespective of others on the socket and dependent only on its rightful share of the LLC capacity. In addition, when there is spare capacity on the socket, or when some workloads are not obtaining beneficial performance from their cache allocation, dCat dynamically reallocates cache space to cache-intensive workloads. We have implemented dCat in Linux on top of CAT to dynamically adjust cache mappings. dCat requires no modifications to applications so that it can be applied to all cloud workloads. Based on our evaluation, we see an average of 25\% improvement over shared cache and 15.7\% over static CAT for selected, memory intensive, SPEC CPU2006 workloads. For typical cloud workloads, with Redis we see 57.6\% improvement (over shared LLC) and 26.6\% improvement (over static partition) and with ElasticSearch we see 11.9\% improvement over both.},
+  booktitle = {Proceedings of the Thirteenth EuroSys Conference},
+  articleno = {14},
+  numpages = {13},
+  location = {Porto, Portugal},
+  series = {EuroSys '18}
+}
+
+@article{reference-7,
+  author = {Jiang, Song and Zhang, Xiaodong (Frank)},
+  year = {2002},
+  month = {06},
+  pages = {31-42},
+  title = {LIRS: An Efficient Low Inter-reference Recency Set Replacement to Improve Buffer Cache Performance},
+  volume = {30},
+  journal = {Performance Evaluation Review},
+  doi = {10.1145/511399.511340}
+}
+
+@article{reference-8,
+  author = {Butt, Ali and Gniady, Chris and Hu, Y.},
+  year = {2005},
+  month = {01},
+  pages = {157-168},
+  title = {The Performance Impact of Kernel Prefetching on Buffer Cache Replacement Algorithms},
+  volume = {56},
+  journal = {IEEE Transactions on Computers - TC},
+  doi = {10.1109/TC.2007.1029}
+}
+
+@article{reference-9,
+  author = {O'Neil, Elizabeth J. and O'Neil, Patrick E. and Weikum, Gerhard},
+  title = {The LRU-K page replacement algorithm for database disk buffering},
+  year = {1993},
+  issue_date = {June 1, 1993},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {22},
+  number = {2},
+  issn = {0163-5808},
+  url = {https://doi.org/10.1145/170036.170081},
+  doi = {10.1145/170036.170081},
+  abstract = {This paper introduces a new approach to database disk buffering, called the LRU-K method. The basic idea of LRU-K is to keep track of the times of the last K references to popular database pages, using this information to statistically estimate the interarrival times of references on a page by page basis. Although the LRU-K approach performs optimal statistical inference under relatively standard assumptions, it is fairly simple and incurs little bookkeeping overhead. As we demonstrate with simulation experiments, the LRU-K algorithm surpasses conventional buffering algorithms in discriminating between frequently and infrequently referenced pages. In fact, LRU-K can approach the behavior of buffering algorithms in which page sets with known access frequencies are manually assigned to different buffer pools of specifically tuned sizes. Unlike such customized buffering algorithms however, the LRU-K method is self-tuning, and does not rely on external hints about workload characteristics. Furthermore, the LRU-K algorithm adapts in real time to changing patterns of access.},
+  journal = {SIGMOD Rec.},
+  month = {06},
+  pages = {297-306},
+  numpages = {10}
+}
+
+@article{reference-10,
+  author = {O'Neil, Elizabeth J. and O'Neil, Patrick E. and Weikum, Gerhard},
+  title = {The LRU-K page replacement algorithm for database disk buffering},
+  year = {1993},
+  isbn = {0897915925},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/170035.170081},
+  doi = {10.1145/170035.170081},
+  abstract = {This paper introduces a new approach to database disk buffering, called the LRU-K method. The basic idea of LRU-K is to keep track of the times of the last K references to popular database pages, using this information to statistically estimate the interarrival times of references on a page by page basis. Although the LRU-K approach performs optimal statistical inference under relatively standard assumptions, it is fairly simple and incurs little bookkeeping overhead. As we demonstrate with simulation experiments, the LRU-K algorithm surpasses conventional buffering algorithms in discriminating between frequently and infrequently referenced pages. In fact, LRU-K can approach the behavior of buffering algorithms in which page sets with known access frequencies are manually assigned to different buffer pools of specifically tuned sizes. Unlike such customized buffering algorithms however, the LRU-K method is self-tuning, and does not rely on external hints about workload characteristics. Furthermore, the LRU-K algorithm adapts in real time to changing patterns of access.},
+  booktitle = {Proceedings of the 1993 ACM SIGMOD International Conference on Management of Data},
+  pages = {297-306},
+  numpages = {10},
+  location = {Washington, D.C., USA},
+  series = {SIGMOD '93}
+}
+
+@article{reference-11,
+  author="Boyar, Joan and Ehmsen, Martin R. and Larsen, Kim S.",
+  editor="Erlebach, Thomas and Kaklamanis, Christos",
+  title="Theoretical Evidence for the Superiority of LRU-2 over LRU for the Paging Problem",
+  booktitle="Approximation and Online Algorithms",
+  year="2007",
+  publisher="Springer Berlin Heidelberg",
+  address="Berlin, Heidelberg",
+  pages="95--107",
+  abstract="The paging algorithm LRU-2 was proposed for use in data-base disk buffering and shown experimentally to perform better than LRU [O'Neil, O'Neil, and Weikum, 1993]. We compare LRU-2 and LRU theoretically, using both the standard competitive analysis and the newer relative worst order analysis. The competitive ratio for LRU-2 is shown to be 2k for cache size k, which is worse than LRU's competitive ratio of k. However, using relative worst order analysis, we show that LRU-2 and LRU are asymptotically comparable in LRU-2's favor, giving a theoretical justification for the experimental results.",
+  isbn="978-3-540-69514-1"
+}
+
+@article{reference-11,
+  author = {Montazeri, Alireza and Beaton, Nicholas and Makaroff, Dwight},
+  year = {2018},
+  month = {10},
+  pages = {571-579},
+  title = {LRU-2 vs 2-LRU: An Analytical Study},
+  doi = {10.1109/LCN.2018.8638120}
+}
+
+@article{reference-12,
+  author={Donghee Lee and Jongmoo Choi and Jong-Hun Kim and Noh, S.H. and Sang Lyul Min and Yookun Cho and Chong Sang Kim},
+  journal={IEEE Transactions on Computers}, 
+  title={LRFU: a spectrum of policies that subsumes the least recently used and least frequently used policies}, 
+  year={2001},
+  volume={50},
+  number={12},
+  pages={1352-1361},
+  keywords={History;Hard disks;Frequency;File systems;Bridges;Databases},
+  doi={10.1109/TC.2001.970573}
+}
+
+@article{reference-13,
+  author={Donghee Lee and Jongmoo Choi and Honggi Choe and Sam H. Noh and Sang Lyul Min and Yookun Cho},
+  booktitle={Proceedings 23rd Euromicro Conference New Frontiers of Information Technology - Short Contributions -}, 
+  title={Implementation and performance evaluation of the LRFU replacement policy}, 
+  year={1997},
+  volume={},
+  number={},
+  pages={106-111},
+  keywords={Frequency;Random access memory;History;Very large scale integration;Operating systems;Databases},
+  doi={10.1109/EMSCNT.1997.658446}
+}
+
+@article{reference-14,
+  author={Putra, Made Adi Paramartha and Situmorang, Hamonangan and Syambas, Nana Rachmana},
+  booktitle={2019 International Conference on Electrical Engineering and Informatics (ICEEI)}, 
+  title={Least Recently Frequently Used Replacement Policy Named Data Networking Approach}, 
+  year={2019},
+  volume={},
+  number={},
+  pages={423-427},
+  keywords={NDN;Content Store;Replacement Policy;LRFU},
+  doi={10.1109/ICEEI47359.2019.8988828}
+}
+
+@article{reference-15,
+  title={2Q: A Low Overhead High Performance Buffer Management Replacement Algorithm},
+  author={Theodore Johnson and Dennis Shasha},
+  booktitle={Very Large Data Bases Conference},
+  year={1994},
+  url={https://api.semanticscholar.org/CorpusID:6259428}
+}
+
+@article{reference-16,
+  author={Si, Chengxiang and Meng, Xiaoxuan and Chen, Yuanfei and Xu, Lu},
+  booktitle={International Symposium on Parallel and Distributed Processing with Applications}, 
+  title={An Effective, Low-Overhead, Improved Replacement Algorithm for Mail Service Applications in Storage System}, 
+  year={2010},
+  volume={},
+  number={},
+  pages={268-274},
+  keywords={Partitioning algorithms;Algorithm design and analysis;Postal services;Performance evaluation;Capacity planning;Time factors;Simulation;cache;replacement algorithms;mail service},
+  doi={10.1109/ISPA.2010.93}
+}
+
+@article{reference-17,
+  author = {Yuanyuan Zhou and James Philbin and Kai Li},
+  title = {The {Multi-Queue} Replacement Algorithm for Second Level Buffer Caches},
+  booktitle = {2001 USENIX Annual Technical Conference (USENIX ATC 01)},
+  year = {2001},
+  address = {Boston, MA},
+  url = {https://www.usenix.org/conference/2001-usenix-annual-technical-conference/multi-queue-replacement-algorithm-second-level},
+  publisher = {USENIX Association},
+  month = {06}
+}
+
+@article{reference-18,
+  author={Wu, Chentao and He, Xubin and Cao, Qiang and Xie, Changsheng},
+  booktitle={2010 39th International Conference on Parallel Processing}, 
+  title={Hint-K: An Efficient Multi-level Cache Using K-Step Hints}, 
+  year={2010},
+  volume={},
+  number={},
+  pages={624-633},
+  keywords={History;Algorithm design and analysis;Mathematical model;Tracking;Data models;Equations;Computers;Multi-level cache;hints;demote;promote;I/O performance},
+  doi={10.1109/ICPP.2010.70}
+}
+
+@article{reference-19,
+  author={Jain, Akanksha and Lin, Calvin},
+  booktitle={2016 ACM/IEEE 43rd Annual International Symposium on Computer Architecture (ISCA)}, 
+  title={Back to the Future: Leveraging Belady's Algorithm for Improved Cache Replacement}, 
+  year={2016},
+  volume={},
+  number={},
+  pages={78-89},
+  keywords={Optimized production technology;History;Prediction algorithms;Marine vehicles;Benchmark testing;Hardware;Art;Cache replacement;Belady's Algorithm},
+  doi={10.1109/ISCA.2016.17}
+}
+
+@article{reference-20,
+  title = "Caching Algorithms and Rational Models of Memory",
+  abstract = "People face a problem similar to that faced by algorithms that manage the memory of computers: trying to organize information to maximize the chance it will be available when needed in the future. In computer science, this problem is known as “caching”. Inspired by this analogy, we compared the properties of a model of human memory proposed by Anderson and Schooler (1991) and caching algorithms used in computer science. We tested each algorithm on a dataset relevant to human cognition: headlines from the New York Times. In addition to overall performance, we investigated whether the algorithms from computer science replicated the well-documented effects of recency, practice, and spacing on human memory. Anderson and Schooler's model performed comparably to the worst caching algorithms, but was the only model that captured the spacing effects seen in human memory data. All models showed similar effects of recency and practice.",
+  keywords = "caching algorithms, memory, rational analysis",
+  author = "Avi Press and Michael Pacer and Griffiths, {Thomas L.} and Brian Christian",
+  note = "Funding Information: Acknowledgments. This work was supported by grant number SMA-1228541 from the National Science Foundation. Publisher Copyright: {\textcopyright} 2014 Proceedings of the 36th Annual Meeting of the Cognitive Science Society, CogSci 2014. All rights reserved.; 36th Annual Meeting of the Cognitive Science Society, CogSci 2014 ; Conference date: 23-07-2014 Through 26-07-2014",
+  year = "2014",
+  language = "English (US)",
+  series = "Proceedings of the 36th Annual Meeting of the Cognitive Science Society, CogSci 2014",
+  publisher = "The Cognitive Science Society",
+  pages = "1198--1203",
+  booktitle = "Proceedings of the 36th Annual Meeting of the Cognitive Science Society, CogSci 2014",
+}
+
+@article{reference-21,
+  author={Belady, L. A.},
+  journal={IBM Systems Journal}, 
+  title={A study of replacement algorithms for a virtual-storage computer}, 
+  year={1966},
+  volume={5},
+  number={2},
+  pages={78-101},
+  keywords={},
+  doi={10.1147/sj.52.0078}
+}
+
+@article{reference-22,
+  author = {Touzeau, Valentin and Maiza, Claire and Monniaux, David and Reineke, Jan},
+  year = {2019},
+  month = {01},
+  pages = {1-29},
+  title = {Fast and exact analysis for LRU caches},
+  volume = {3},
+  journal = {Proceedings of the ACM on Programming Languages},
+  doi = {10.1145/3290367}
+}
+
+@article{reference-23,
+  author={Hasslinger, Gerhard and Heikkinen, Juho and Ntougias, Konstantinos and Hasslinger, Frank and Hohlfeld, Oliver},
+  booktitle={2018 16th International Symposium on Modeling and Optimization in Mobile, Ad Hoc, and Wireless Networks (WiOpt)}, 
+  title={Optimum caching versus LRU and LFU: Comparison and combined limited look-ahead strategies}, 
+  year={2018},
+  volume={},
+  number={},
+  pages={1-6},
+  keywords={Analytical models;Shape;Streaming media;Delays;Benchmark testing;Markov processes;Indexes;Web cache strategies;optimum caching;Belady's algorithm;hit rate;simulation;Zipf distributed requests;least recently used (LRU);least frequently used (LFU)},
+  doi={10.23919/WIOPT.2018.8362880}
+}
+
+@article{reference-24,
+  author = {Maffeis, Silvano},
+  title = {Cache management algorithms for flexible filesystems},
+  year = {1993},
+  issue_date = {Dec. 1993},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {21},
+  number = {2},
+  issn = {0163-5999},
+  url = {https://doi.org/10.1145/174215.174219},
+  doi = {10.1145/174215.174219},
+  abstract = {Cache management in flexible filesystems deals with the problem of determining a cached file to be replaced when the local cachespace is exhausted. In analogy to virtual memory management, several different algorithms exist for managing cached files. In this paper we simulate the behavior of First-In-First-Out (FIFO), Least Recently Used (LRU), Least Frequently Used (LFU) and a variation of LFU we call the File Length Algorithm (LEN) from the viewpoint of file access times, cache hit ratios and availability. The results of several simulation runs are presented and interpreted.},
+  journal = {SIGMETRICS Perform. Eval. Rev.},
+  month = {12},
+  pages = {16-25},
+  numpages = {10}
+}
+
+@misc{reference-25,
+  title = {BrightKite Data},
+  url = {https://snap.stanford.edu/data/loc-brightkite.html}
+}
+
+@misc{reference-26,
+  title = {CitiBike System Data},
+  url = {https://www.citibikenyc.com/system-data}
+}
+
+@article{reference-27,
+  author = {Albers, Susanne and Favrholdt, Lene M. and Giel, Oliver},
+  title = {On paging with locality of reference},
+  year = {2002},
+  isbn = {1581134959},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/509907.509949},
+  doi = {10.1145/509907.509949},
+  abstract = {Motivated by the fact that competitive analysis yields too pessimistic results when applied to the paging problem, there has been considerable research interest in refining competitive analysis and in developing alternative models for studying online paging. The goal is to devise models in which theoretical results capture phenomena observed in practice.In this paper we propose a new, simple model for studying paging with locality of reference. The model is closely related to Denning's working set concept and directly reflects the amount of locality that request sequences exhibit. We demonstrate that our model is reasonable from a practical point of view.We use the page fault rate to evaluate the quality of paging algorithms, which is the performance measure used in practice. We develop tight or nearly tight bounds on the fault rates achieved by popular paging algorithms such as LRU, FIFO, deterministic Marking strategies and LFD. It shows that LRU is an optimal online algorithm, whereas FIFO and Marking strategies are not optimal in general. We present an experimental study comparing the page fault rates proven in our analyses to the page fault rates observed in practice. This is the first such study for an alternative/refined paging model.},
+  booktitle = {Proceedings of the Thiry-Fourth Annual ACM Symposium on Theory of Computing},
+  pages = {258–267},
+  numpages = {10},
+  location = {Montreal, Quebec, Canada},
+  series = {STOC '02}
+}
+
+@article{reference-28,
+  author = {Liu, Ziyang and Hacıgümüş, Hakan and Moon, Hyun and Chi, Yun and Hsiung, Wang-Pin},
+  year = {2013},
+  month = {03},
+  pages = {442-453},
+  title = {PMAX: Tenant placement in multitenant databases for profit maximization},
+  journal = {ACM International Conference Proceeding Series},
+  doi = {10.1145/2452376.2452428}
+}
+
+@article{reference-29,
+  author={Xiong, Pengcheng and Chi, Yun and Zhu, Shenghuo and Moon, Hyun Jin and Pu, Calton and Hacigümüş, Hakan},
+  booktitle={2011 IEEE 27th International Conference on Data Engineering}, 
+  title={Intelligent management of virtualized resources for database systems in cloud environment}, 
+  year={2011},
+  volume={},
+  number={},
+  pages={87-98},
+  keywords={Databases;Resource management;Machine learning;Linear regression;System performance;Regression tree analysis;Time factors;cloud computing;virtualization;database systems;multitenant databases},
+  doi={10.1109/ICDE.2011.5767928}
+}
+
+@misc{reference-30,
+  author       = "Huawei 2012 Labs and Huawei Cloud Computing",
+  title        = "ICPC 2023 Online Spring Challenge powered by Huawei: Buffer Sharing in Multi-Tenant Database Environment",
+  year         = {2022},
+  month        = {04},
+  url          = "https://codeforces.com/blog/entry/112838",
+  note         = "Problem statement at \url{https://codeforces.com/contest/1813/problem/A}",
+}
+
+@misc{reference-31,
+  author       = {Noé Weeks},
+  title        = {Comments on ICPC 2023 Online Spring Challenge powered by Huawei: Buffer Sharing in Multi-Tenant Database Environment},
+  note         = "URLS: \url{https://codeforces.com/blog/entry/112838?\#comment-1025614}, \url{https://codeforces.com/blog/entry/112838?\#comment-1025642}",
+  year         = {2022},
+  month        = {04},
+}
+
+@misc{reference-32,
+  author       = {Xinyu Lei},
+  title        = {Comments on ICPC 2023 Online Spring Challenge powered by Huawei: Buffer Sharing in Multi-Tenant Database Environment},
+  url          = "https://codeforces.com/blog/entry/112838?%5C#comment-1025628",
+  year         = {2022},
+  month        = {04},
+}
+
