@@ -118,44 +118,89 @@ resources than they are promised. \cite{buffer-sharing-1} The main challenge is 
 allocate resources to tenants in a way that guarantees the performance of each tenant 
 workload.
 
-\section{Cost function optimization}
+\section{Service Level Agreements and Hit Ratio Degradation}
 
-\lipsum[1-1] \cite{reference-3}
+In a multi-tenant environment, it is common to have service level agreements (SLAs)
+or Quality of Service (QoS) requirements for each tenant. For example, in a cloud 
+database service, a tenant may have promosed some amount of buffer space, and the
+provider should guarantee a performance goal for the tenant.
+
+The performance goal can be defined in terms of fault or hit ratio, like the fault
+or hit ratio achieved if the tenant would had a dedicated cache of some promised size.
+In a case where there is not a promised size like in the cloud environment, we can 
+compare the achieved hit ratio with the hit ratio achieved by a tenant with a dedicated
+cache of the size of the recommendation we have.
+
+Metrics comparing the achieved hit ratio with the hit ratio of a dedicated cache have
+been proposed in the literature, like the hit ratio degradation (HRD), as the difference 
+in total hits, between the baseline and any scheme that assigns memory dynamically, 
+normalized by the total memory accesses \cite{buffer-sharing-1} or other quality of 
+service metrics like in \cite{learning-based-prediction}.
+
+\section{Penalty Function Optimization}
+
+We will consider the following penalty function to optimize:
+
+$$
+\sum_{t \in \text{Tenants}} \left( \frac{\text{Solution Cache faults}_t - \text{LRU Cache faults}_t}{\text{LRU Cache faults}_t} \right) ^2 \text{Priority}_t \left[\text{Solution Cache faults}_t \geq \text{LRU Cache faults}_t\right]
+$$
+
+In which, for each tenant $t$:
+\begin{itemize}
+    \item $\text{Solution Cache faults}_t$ is the number of cache faults of the eviction policy we are testing.
+    \item $\text{LRU Cache faults}_t$ is the number of cache faults of the LRU eviction policy if we had a dedicated cache of some promised size.
+    \item $\text{Priority}_t$ is the priority of the tenant, which can be defined in terms of the cost of a cache fault for the tenant, or the importance of the tenant. If there is no need to prioritize tenants, we can set $\text{Priority}_t = 1$ for all tenants, in case it is needed, priorities can be defined based on how importanat is for each tenant to achieve the promised hit ratio.
+    \item The term in brackets is a condition so we only penalize the eviction policy if it has more cache faults than the isolated LRU eviction policy.
+\end{itemize}
+
+We normalize by the number of cache faults of the isolated LRU eviction policy, to make 
+the penalty function independent of the number of tenants and the size of the cache, and to 
+not prioritize tenants by the size of the access pattern.
+
+We use squared ratio to penalize more the eviction policies that have a higher difference
+in cache faults with the isolated LRU eviction policy, since we want to minimize the
+difference in cache faults with the isolated LRU eviction policy, and smaller differences
+are more tolerable.
+
+This cost function was also used in ICPC 2023 Online Spring Challenge powered by Huawei: 
+Buffer Sharing in Multi-Tenant Database Environment \cite{huawei-challenge}. Better results
+were observed using this penalty function instead of using cache hits instead of faults.
+
+Our goal is to minimize the penalty function, and we will compare the performance of
+different eviction policies based on this penalty function.
 
 \section{Research Question}
 
-\begin{table}[ht!]
-    \centering
-    \begin{tabular}{c c c}
-        \hline
-        Column 1 & Column 2 & Column 3 \\
-        \hline
-        Item 1   & Item 2   & Item 3   \\
-    \end{tabular}
-    \caption{Lorem ipsum dolor sit amet}
-    \label{tab:tabA-1}
-\end{table}
+In multi-tenant caches, the main challenges are to allocate the buffer space among tenants
+in a way that guarantees the performance of each tenant workload, and to design an eviction
+policy that best satisfies the service level agreements for each tenant and does not waste
+buffer space. 
 
-\lipsum[1-1] \ref{tab:tabA-1}
+Improving the cache performance in multi-tenant caches is interesting both for commercial
+and research purposes, and it results in the main research question of this thesis:
 
-\begin{table}[ht!]
-    \centering
-    \begin{tabular}{c c c}
-        \hline
-        Column 1 & Column 2 & Column 3 \\
-        \hline
-        Item 1   & Item 2   & Item 3   \\
-    \end{tabular}
-    \caption{Lorem ipsum dolor sit amet}
-    \label{tab:tabB-1}
-\end{table}
-
-\lipsum[1-1] \ref{tab:tabB-1}
+\textit{How to design an eviction policy for multi-tenant caches that best satisfies 
+the service level agreements for each tenant and does not waste buffer space?}
 
 \section{Objectives}
 
-\lipsum[1-2]
+To address the research question, the following objectives are proposed:
+
+\begin{enumerate}
+    \item Provide a clear overview of the multi-tenant caching problem.
+    \item Describe the baseline algorithm with tenant selection policy and the cache eviction algorithm.
+    \item Implement and describe different eviction policies, adapting them to the dynamic buffer size of each tenant.
+    \item Perform experiments with real world data to compare the performance of different eviction policies.
+    \item Analyze the results and propose improvements to the tenant selection and eviction policies.
+\end{enumerate}
 
 \section{Outline}
 
-\lipsum[1-2]
+The outline for the rest of the thesis is as follows:
+
+\begin{itemize}
+    \item \textbf{Chapter 2: Algorithm Overview} - Will describe the base algorithm that we used, and discuss possible tenant selection and cache eviction policies.
+    \item \textbf{Chapter 3: Experiments and Methodology} - Will describe the datasets we used, with data collection and processing part, and the performed experiments.
+    \item \textbf{Chapter 4: Results} - Will present and analyze the results of the experiments, comparing different eviction policies.
+    \item \textbf{Chapter 5: Conclusions and Recommendations} - Will summarize the results and propose recommendations for future work.
+\end{itemize}
