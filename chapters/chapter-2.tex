@@ -2,7 +2,87 @@
 
 \section{Base Algorithm}
 
-\lipsum[1-3]
+Let's describe the base algorithm of this thesis for multi-tenant caching, its detailed 
+pseudcode is shown in Figure \ref{fig:base_algorithm}.
+
+For each page access, the algorithm first checks if the page is in the cache,
+in case it is, it returns the buffer location and the hit flag as true. It also 
+updates the access history of the page in the cache eviction policy, for example,
+for LRU, it moves the page to the top of the list (of that tenant).
+
+If the page is not in the cache, the algorithm checks if there is available space
+in the cache. If there is, it gets the first available buffer location and adds the
+page to the cache. 
+
+If there is no available space, the algorithm selects a page to evict from the cache 
+using the tenant selection policy and the cache eviction policy. The algorithm then 
+evicts the page and adds the new page to the cache.
+
+Note that the tenant selection policy's responsibility is to select the tenant to evict
+from the cache, each time a page needs to be evicted, for this, some metrics of the 
+tenants can be used.
+
+The cache eviction policy's responsibility is to manage the cache, including:
+\begin{itemize}
+    \item \textbf{UpdateAccessHistory}(\textit{page}, \textit{tenant}): Update the access history when a page is accessed.
+    \item \textbf{AddPageToCache}(\textit{page}, \textit{tenant}, \textit{buffer\_location}): Add a page to the cache of a tenant in a specific buffer location.
+    \item \textbf{EvictPage}(\textit{tenant\_to\_evict}): Evict a page from the cache of a tenant.
+\end{itemize}
+
+Each of the described tenant selection policies and cache eviction policies will implement
+these functions, and the base algorithm will call them when needed.
+
+Note that the base algorithm is a general dynamic multi-tenant cache algorithm that can 
+be used with different tenant selection and cache eviction policies. The next sections 
+will describe the tenant selection and cache eviction policies used with the base algorithm.
+
+Another algorithm for dynamic multi-tenant buffer allocation was proposed in the 
+literature in \cite{buffer-sharing-1}, a hybrid approach combining global and static 
+buffer allocation was proposed in \cite{article-for-2level-forecasting}.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{\linewidth}
+    \begin{algorithm}[H]
+        \caption{Base Algorithm to process each page access}
+        \begin{algorithmic}
+            \STATE \textbf{Input:} $(p, t)$ - The page id and tenant of the page to be accessed.
+            \STATE \textbf{Output:} $(b, h)$ - The buffer location of the page accessed and whether it is a hit or not.
+            \STATE
+            \STATE $(\text{buffer\_location}, \text{is\_hit}) \leftarrow \text{GetPageLocationIfItIsInCache}(\text{page} = p, \text{tenant} = t)$
+            \IF {$\text{is\_hit}$}
+                \STATE $\text{CacheEvictionPolicy.UpdateAccessHistory}(\text{page} = p, \text{tenant} = t)$
+                \RETURN $(b = \text{buffer\_location}, h = \text{true})$
+            \ELSE
+                \STATE \COMMENT {Page is not in cache, we need to find a place for it}
+                \IF {There is available space in cache}
+                    \STATE $\text{available\_location} \leftarrow \text{GetAvailableBufferLocation}()$ \COMMENT {Get the first available buffer location}
+                    \STATE $\text{CacheEvictionPolicy.AddPageToCache(\text{page} = p, \text{tenant} = t, \text{available\_location})}$
+                    \RETURN $(b = \text{available\_location}, h = \text{false})$
+                \ELSE
+                    \STATE \COMMENT {Cache is full, we need to evict a page}
+                    \STATE $\text{tenant\_to\_evict} \leftarrow \text{TenantSelectionPolicy.GetTenantToEvict}()$
+                    \STATE $\text{evicted\_page} \leftarrow \text{CacheEvictionPolicy.EvictPage}(\text{tenant\_to\_evict})$
+                    \STATE $b \leftarrow \text{evicted\_page.buffer\_location}$
+                    \STATE $\text{CacheEvictionPolicy.AddPageToCache}(\text{page} = p, \text{tenant} = t, \text{buffer\_location} = b)$
+                    \RETURN $(b, h = \text{false})$
+                \ENDIF
+            \ENDIF
+            \STATE
+            \STATE \textbf{function} GetPageLocationIfItIsInCache(page, tenant):
+            \STATE \hspace{\algorithmicindent} \textbf{if} page is in cache \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} $(\text{page.buffer\_location}, \text{true})$
+            \STATE \hspace{\algorithmicindent} \textbf{else}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} $(\text{null}, \text{false})$
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \textbf{end function}
+        \end{algorithmic}
+    \end{algorithm}
+    \caption{Base Algorithm}
+    \label{fig:base_algorithm}
+    \end{minipage}
+\end{figure}
+    
 
 \section{Tenant Selection Policy}
 
@@ -68,7 +148,7 @@
     \label{tab:tabB-2}
 \end{table}
 
-\lipsum[1-1] \ref{tab:tabB-1}
+\lipsum[1-1]
 
 \subsection{LRU}
 
