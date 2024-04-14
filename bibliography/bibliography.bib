@@ -104,7 +104,7 @@
   doi = {10.1109/TC.2007.1029}
 }
 
-@article{reference-9,
+@article{lru-k,
   author = {O'Neil, Elizabeth J. and O'Neil, Patrick E. and Weikum, Gerhard},
   title = {The LRU-K page replacement algorithm for database disk buffering},
   year = {1993},
@@ -123,24 +123,7 @@
   numpages = {10}
 }
 
-@article{reference-10,
-  author = {O'Neil, Elizabeth J. and O'Neil, Patrick E. and Weikum, Gerhard},
-  title = {The LRU-K page replacement algorithm for database disk buffering},
-  year = {1993},
-  isbn = {0897915925},
-  publisher = {Association for Computing Machinery},
-  address = {New York, NY, USA},
-  url = {https://doi.org/10.1145/170035.170081},
-  doi = {10.1145/170035.170081},
-  abstract = {This paper introduces a new approach to database disk buffering, called the LRU-K method. The basic idea of LRU-K is to keep track of the times of the last K references to popular database pages, using this information to statistically estimate the interarrival times of references on a page by page basis. Although the LRU-K approach performs optimal statistical inference under relatively standard assumptions, it is fairly simple and incurs little bookkeeping overhead. As we demonstrate with simulation experiments, the LRU-K algorithm surpasses conventional buffering algorithms in discriminating between frequently and infrequently referenced pages. In fact, LRU-K can approach the behavior of buffering algorithms in which page sets with known access frequencies are manually assigned to different buffer pools of specifically tuned sizes. Unlike such customized buffering algorithms however, the LRU-K method is self-tuning, and does not rely on external hints about workload characteristics. Furthermore, the LRU-K algorithm adapts in real time to changing patterns of access.},
-  booktitle = {Proceedings of the 1993 ACM SIGMOD International Conference on Management of Data},
-  pages = {297-306},
-  numpages = {10},
-  location = {Washington, D.C., USA},
-  series = {SIGMOD '93}
-}
-
-@article{reference-11,
+@article{lru-2s-theoretical-superiority-over-lru,
   author="Boyar, Joan and Ehmsen, Martin R. and Larsen, Kim S.",
   editor="Erlebach, Thomas and Kaklamanis, Christos",
   title="Theoretical Evidence for the Superiority of LRU-2 over LRU for the Paging Problem",
@@ -153,7 +136,7 @@
   isbn="978-3-540-69514-1"
 }
 
-@article{reference-11,
+@article{lru-2-analytical-study,
   author = {Montazeri, Alireza and Beaton, Nicholas and Makaroff, Dwight},
   year = {2018},
   month = {10},
@@ -162,7 +145,7 @@
   doi = {10.1109/LCN.2018.8638120}
 }
 
-@article{reference-12,
+@article{lrfu-article,
   author={Donghee Lee and Jongmoo Choi and Jong-Hun Kim and Noh, S.H. and Sang Lyul Min and Yookun Cho and Chong Sang Kim},
   journal={IEEE Transactions on Computers}, 
   title={LRFU: a spectrum of policies that subsumes the least recently used and least frequently used policies}, 
@@ -198,7 +181,7 @@
   doi={10.1109/ICEEI47359.2019.8988828}
 }
 
-@article{reference-15,
+@article{2q-article,
   title={2Q: A Low Overhead High Performance Buffer Management Replacement Algorithm},
   author={Theodore Johnson and Dennis Shasha},
   booktitle={Very Large Data Bases Conference},
@@ -279,7 +262,7 @@
   doi={10.1147/sj.52.0078}
 }
 
-@article{reference-22,
+@article{lru-analysis-article,
   author = {Touzeau, Valentin and Maiza, Claire and Monniaux, David and Reineke, Jan},
   year = {2019},
   month = {01},
@@ -379,7 +362,7 @@
   note         = "Problem statement at \url{https://codeforces.com/contest/1813/problem/A}",
 }
 
-@misc{reference-31,
+@misc{noe-weeks-comments,
   author       = {Noé Weeks},
   title        = {Comments on ICPC 2023 Online Spring Challenge powered by Huawei: Buffer Sharing in Multi-Tenant Database Environment},
   note         = "URLS: \url{https://codeforces.com/blog/entry/112838?\#comment-1025614}, \url{https://codeforces.com/blog/entry/112838?\#comment-1025642}",
@@ -387,7 +370,7 @@
   month        = {04},
 }
 
-@misc{reference-32,
+@misc{xinyu-lei-comments,
   author       = {Xinyu Lei},
   title        = {Comments on ICPC 2023 Online Spring Challenge powered by Huawei: Buffer Sharing in Multi-Tenant Database Environment},
   url          = "https://codeforces.com/blog/entry/112838?%5C#comment-1025628",
@@ -476,5 +459,83 @@
 @misc{oracle-cloud,
   title = {Oracle Database Cloud Service},
   url = {https://oracle.com/database/},
+}
 
+@misc{wikipedia-lfu,
+  title = {Least Frequently Used},
+  url = {https://en.wikipedia.org/wiki/Least_frequently_used},
+}
+
+@article{cache-management-algorithms-for-flexible-filesystems,
+  author = {Maffeis, Silvano},
+  title = {Cache management algorithms for flexible filesystems},
+  year = {1993},
+  issue_date = {Dec. 1993},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {21},
+  number = {2},
+  issn = {0163-5999},
+  url = {https://doi.org/10.1145/174215.174219},
+  doi = {10.1145/174215.174219},
+  abstract = {Cache management in flexible filesystems deals with the problem of determining a cached file to be replaced when the local cachespace is exhausted. In analogy to virtual memory management, several different algorithms exist for managing cached files. In this paper we simulate the behavior of First-In-First-Out (FIFO), Least Recently Used (LRU), Least Frequently Used (LFU) and a variation of LFU we call the File Length Algorithm (LEN) from the viewpoint of file access times, cache hit ratios and availability. The results of several simulation runs are presented and interpreted.},
+  journal = {SIGMETRICS Perform. Eval. Rev.},
+  month = {12},
+  pages = {16-25},
+  numpages = {10}
+}
+
+@article{lfu-highest-perf-zipf,
+  title={Web caching and Zipf-like distributions: evidence and implications},
+  author={Lee Breslau and Pei Cao and Li Fan and Graham Phillips and Scott Shenker},
+  journal={IEEE INFOCOM '99. Conference on Computer Communications. Proceedings. Eighteenth Annual Joint Conference of the IEEE Computer and Communications Societies. The Future is Now (Cat. No.99CH36320)},
+  year={1999},
+  volume={1},
+  pages={126-134 vol.1},
+  url={https://api.semanticscholar.org/CorpusID:1796701}
+}
+
+@inproceedings{lfu-highest-perf-inproc,
+  title={Caching Web objects using Zipf's law},
+  author={Dimitrios N. Serpanos and Wayne H. Wolf},
+  booktitle={Other Conferences},
+  year={1998},
+  url={https://api.semanticscholar.org/CorpusID:62209038}
+}
+
+@inproceedings{tiny-lfu,
+  author = {Einziger, Gil and Friedman, Roy},
+  year = {2014},
+  month = {02},
+  pages = {146-153},
+  title = {TinyLFU: A Highly Efficient Cache Admission Policy},
+  doi = {10.1109/PDP.2014.34}
+}
+
+@misc{o-1-lfu,
+      title={An O(1) algorithm for implementing the LFU cache eviction scheme}, 
+      author={Dhruv Matani and Ketan Shah and Anirban Mitra},
+      year={2021},
+      eprint={2110.11602},
+      archivePrefix={arXiv},
+      primaryClass={cs.DS}
+}
+
+@article{lru-factor-b,
+  author = {Sleator, Daniel D. and Tarjan, Robert E.},
+  title = {Amortized efficiency of list update and paging rules},
+  year = {1985},
+  issue_date = {Feb. 1985},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {28},
+  number = {2},
+  issn = {0001-0782},
+  url = {https://doi.org/10.1145/2786.2793},
+  doi = {10.1145/2786.2793},
+  abstract = {In this article we study the amortized efficiency of the “move-to-front” and similar rules for dynamically maintaining a linear list. Under the assumption that accessing the ith element from the front of the list takes θ(i) time, we show that move-to-front is within a constant factor of optimum among a wide class of list maintenance rules. Other natural heuristics, such as the transpose and frequency count rules, do not share this property. We generalize our results to show that move-to-front is within a constant factor of optimum as long as the access cost is a convex function. We also study paging, a setting in which the access cost is not convex. The paging rule corresponding to move-to-front is the “least recently used” (LRU) replacement rule. We analyze the amortized complexity of LRU, showing that its efficiency differs from that of the off-line paging rule (Belady's MIN algorithm) by a factor that depends on the size of fast memory. No on-line paging algorithm has better amortized performance.},
+  journal = {Commun. ACM},
+  month = {02},
+  pages = {202-208},
+  numpages = {7}
 }

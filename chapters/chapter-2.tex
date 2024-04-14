@@ -86,84 +86,639 @@ buffer allocation was proposed in \cite{article-for-2level-forecasting}.
 
 \section{Tenant Selection Policy}
 
-\lipsum[1-1] \ref{fig:figA-1}
+The tenant selection policy is responsible for selecting the tenant
+to evict from the cache when a page needs to be evicted.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.3  \textwidth]{dummy.png}
-    \caption{Lorem ipsum dolor sit amet}
-    \label{fig:figA-2}
-\end{figure}
+In order to properly select the tenant to evict, the tenant selection policies will use 
+some metrics of the tenants, such as the number of pages currently in the cache, 
+the number of accesses, the number of hits, the number of faults. It is simple to 
+keep track of these metrics with negligible overhead. In many applications, these 
+metrics are already kept track of in the cache eviction policy, like in many DBMSs \cite{buffer-sharing-1}.
 
-\lipsum[1-1] \ref{fig:figB-1}
+Other important metric that will allow us to better select the tenant to evict is 
+the number of hits or faults if we had a cache of the promised size, or a cache 
+$x\%$ higher than the recommendation in case there is no promised size, keeping track of 
+this metrics requires additional overhead, like to simulate a LRU or other cache 
+of the promised size for each tenant. Simulating a cache per tenant for selection 
+purposes has been proposed and analysed in the literature in \cite{buffer-sharing-1}.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.3\textwidth]{dummy.png}
-    \caption{Lorem ipsum dolor sit amet}
-    \label{fig:figB-2}
-\end{figure}
+Many of the tenant selection policies described here will require aditional overhead 
+metrics in order to work properly, in real applications, this overhead needs to be 
+considered in comparison to the benefits of the eviction policy.
 
 \subsection{Fault Ratio Policy}
 
-\lipsum[1-1] \cite{reference-1}
+Fault ratio policy comes from the idea that the tenant with the highest fault ratio
+with respect to the fault ratio of the cache of the promised size (or size $x\%$ bigger than
+the recommendation) should be evicted.
+
+The evicted tenant $t$ is the one that minimizes the following formula:
+
+$$
+\left( \frac{\text{Solution Cache faults}_t - \text{LRU Cache faults}_t}{\text{LRU Cache faults}_t} \right) ^2 \text{Priority}_t \, \cdot \, \text{sgn}( \text{Solution Cache faults}_t - \text{LRU Cache faults}_t )
+$$
+
+Where:
+
+\begin{itemize}
+    \item $\text{Solution Cache faults}_t$ --- is the number of faults of the tenant in the cache of the promised size (or $x\%$ bigger than the recommendation).
+    \item $\text{LRU Cache faults}_t$ --- is the number of faults of the tenant in a LRU cache of the promised size (or $x\%$ bigger than the recommendation).
+    \item $\text{Priority}_t$ --- is the priority of the tenant.
+    \item $\text{sgn}(x)$ --- is the sign function, returning $1$ if $x > 0$, $-1$ if $x < 0$ and $0$ if $x = 0$.
+\end{itemize}
+
+Note that we evict from the tenant that is performing the best in terms of our penalty
+function, we use sign instead of condition to penalize by how much the tenant is performing
+better than the LRU cache of the promised size, so we evict more from tenants that are
+performing better.
+
+This policy is a part of the policy proposed by Noé Weeks in \cite{noe-weeks-comments} for 
+ICPC 2023 Online Spring Challenge powered by Huawei: Buffer Sharing in Multi-Tenant Database Environment \cite{huawei-challenge}.
+
+Note that this tenant selection policy requires additional overhead to keep track of the
+number of faults of the tenants in the cache of the promised size (or $x\%$ bigger than the recommendation),
+so it needs to simulate an LRU cache for each tenant.
+
+This policy can be modified to use as baseline algorithm to compare, the same cache algorithm
+that will be used in the cache eviction policy, in order to use it as a quantitative measure 
+of the impact of multi-tenancy on performance. We did not do this in this thesis, since
+our penalty function is based on the LRU cache of the promised size.
 
 \subsection{Hit Ratio Policy}
 
-\lipsum[1-1] \cite{reference-2}
+Hit ratio policy is very similar to the fault ratio policy, but instead of using the faults,
+it uses the hits of the tenants in the cache of the promised size (or $x\%$ bigger than the recommendation).
+
+The evicted tenant $t$ is the one that minimizes the following formula:
+
+$$
+\left( \frac{\text{LRU Cache hits}_t - \text{Solution Cache hits}_t}{\text{LRU Cache hits}_t} \right) ^2 \text{Priority}_t \, \cdot \, \text{sgn}( \text{LRU Cache hits}_t - \text{Solution Cache hits}_t )
+$$
+
+Where:
+
+\begin{itemize}
+    \item $\text{Solution Cache hits}_t$ --- is the number of hits of the tenant in the cache of the promised size (or $x\%$ bigger than the recommendation).
+    \item $\text{LRU Cache hits}_t$ --- is the number of hits of the tenant in a LRU cache of the promised size (or $x\%$ bigger than the recommendation).
+    \item $\text{Priority}_t$ --- is the priority of the tenant.
+    \item $\text{sgn}(x)$ --- is the sign function, returning $1$ if $x > 0$, $-1$ if $x < 0$ and $0$ if $x = 0$.
+\end{itemize}
+
+This policy is very similar to the fault ratio policy, since more hits means less faults,
+and we observed better results with the fault ratio policy, therefore we will use it more.
+
+Like in the fault ratio policy, this policy requires additional overhead to keep track of the
+number of hits of the tenants in the cache of the promised size (or $x\%$ bigger than the recommendation),
+so it needs to simulate an LRU cache for each tenant.
+
+This policy can also be modified to use as baseline algorithm to compare, the same cache algorithm
+that will be used in the cache eviction policy, in order to use it as a quantitative measure
+of the impact of multi-tenancy on performance.
 
 \subsection{Fault Ratio with Cache Used Policy}
 
-\lipsum[1-1] \cite{reference-3}
+Fault ratio with cache used policy is a modification of the fault ratio policy, where we
+divide by the ratio squared of the cache currently used by the tenant and the cache of the
+promised size (or $x\%$ bigger than the recommendation).
+
+The evicted tenant $t$ is the one that minimizes the following formula:
+
+$$
+\frac{ \left( \frac{\text{Solution Cache faults}_t - \text{LRU Cache faults}_t}{\text{LRU Cache faults}_t} \right) ^2 \text{Priority}_t \, \cdot \, \text{sgn}( \text{Solution Cache faults}_t - \text{LRU Cache faults}_t ) }{ \left( \frac{\text{Cache Used}_t}{\text{LRU Base Cache Size}_t} \right) ^2 }
+$$
+
+Where:
+
+\begin{itemize}
+    \item $\text{Solution Cache faults}_t$ --- is the number of faults of the tenant in the cache of the promised size (or $x\%$ bigger than the recommendation).
+    \item $\text{LRU Cache faults}_t$ --- is the number of faults of the tenant in a LRU cache of the promised size (or $x\%$ bigger than the recommendation).
+    \item $\text{Priority}_t$ --- is the priority of the tenant.
+    \item $\text{sgn}(x)$ --- is the sign function, returning $1$ if $x > 0$, $-1$ if $x < 0$ and $0$ if $x = 0$.
+    \item $\text{Cache Used}_t$ --- is the number of pages currently in the cache of the tenant.
+    \item $\text{LRU Base Cache Size}_t$ --- is the size of the LRU cache of the promised size (or $x\%$ bigger than the recommendation) for the tenant.
+\end{itemize}
+
+The modification in this policy comes from the idea that if a tenant is using more cache
+with respect to the cache of the promised size, it can match the base LRU performance 
+better, so we can afford to evict more from this tenant, in the same way, if a tenant is
+using less cache, it will be harder to match the base LRU performance, so we should evict
+less from this tenant.
+
+This policy requires same overhead as the fault ratio policy, since it needs to keep track
+the same metrics plus the cache used by the tenants, which is a simple metric to keep track
+of.
+
+It can also be modified to use as baseline algorithm to compare, the same cache algorithm
+that will be used in the cache eviction policy, in order to use it as a quantitative measure
+of the impact of multi-tenancy on performance.
+
+This policy showed the better results when we tried, therefore we will use it as the main 
+tenant selection policy in this thesis, it was also used as the main tenant selection policy
+by Noé Weeks \cite{noe-weeks-comments} in the ICPC 2023 Online Spring Challenge powered by Huawei: Buffer Sharing in
+Multi-Tenant Database Environment \cite{huawei-challenge}.
 
 \subsection{Naive Policy}
 
-\lipsum[1-1] \cite{reference-3}
+For the naive policy, we will evict from the tenant that its cache size is furthest
+from the cache of the promised size (or $x\%$ bigger than the recommendation) (in ratio).
+
+The evicted tenant $t$ is the one that minimizes the following formula:
+
+$$
+\frac{ \text{Cache Used}_t }{ \text{LRU Base Cache Size}_t }
+$$
+
+In case of a tie (each tenant has the number of pages in the cache with the same 
+proportion to the recommendation), we will evict from the same tenant of the page that 
+is being accessed.
+
+
+In case of not changing recommendation, like in the case of comparing to the cache of
+the promised size, this policy makes our algorihtm behabe like a static cache algorithm
+for each tenant.
+
+This policy requires no additional overhead, since it only needs to keep track of the
+number of pages in the cache of the tenants.
 
 \section{Cache Eviction Policy}
 
-\begin{table}[ht!]
-    \centering
-    \begin{tabular}{c c c}
-        \hline
-        Column 1 & Column 2 & Column 3 \\
-        \hline
-        Item 1   & Item 2   & Item 3   \\
-    \end{tabular}
-    \caption{Lorem ipsum dolor sit amet}
-    \label{tab:tabA-2}
-\end{table}
+The cache eviction policy is responsible for managing the cache, including updating the
+access history when a page is accessed, adding a page to the cache and evicting a page
+from the cache.
 
-\lipsum[1-1] \ref{tab:tabA-1}
+The cache eviction policies will be used with the base algorithm, and they will implement
+the following functions:
 
-\begin{table}[ht!]
-    \centering
-    \begin{tabular}{c c c}
-        \hline
-        Column 1 & Column 2 & Column 3 \\
-        \hline
-        Item 1   & Item 2   & Item 3   \\
-    \end{tabular}
-    \caption{Lorem ipsum dolor sit amet}
-    \label{tab:tabB-2}
-\end{table}
+\begin{itemize}
+    \item \textbf{UpdateAccessHistory}(\textit{page}, \textit{tenant}): Update the access history when a page is accessed.
+    \item \textbf{AddPageToCache}(\textit{page}, \textit{tenant}, \textit{buffer\_location}): Add a page to the cache of a tenant in a specific buffer location.
+    \item \textbf{EvictPage}(\textit{tenant\_to\_evict}): Evict a page from the cache of a tenant.
+\end{itemize}
 
-\lipsum[1-1]
+Note that the cache eviction policies need to be implemented in a different way with respect
+to the single tenant cache problem, since here we can evict a page from one tenant, and 
+use the freed space to add a page from another tenant, and the size assigned to each tenant
+can change over time.
+
+In the implementations, we will keep a separate structure of cache
+for each tenant, like a separated linked list for each tenant in the case of LRU,
+note that, however, buffer locations are shared between tenants, so we can evict a page
+from one tenant and use the freed space to add a page from another tenant.
+
+Since in this thesis we are focusing on the cache eviction and the tenant selection 
+policies we will not keep cache items or pages themselves in the cache, we will just keep
+the buffer location in the cache. 
+
+Let's describe each of the cache eviction policy in detail in next sections.
 
 \subsection{LRU}
 
+Least Recently Used (Belady, 1966), is a cache eviction policy that evicts the page that was least
+recently used, it comes from the assumption that the page that was least recently used is the
+least likely to be used in the near future.
+
+It was the was the algorithm of choice in the most cases until the early 80s \cite{2q-article},
+and it is the cache eviction policy that has been studied the most and it is considered
+the most predictable cache eviction policy \cite{lru-analysis-article}, and it never
+replaces more than a factor of $B$ as many elements as the optimal offline algorithm, where $B$
+is the size of the buffer \cite{lru-factor-b}. For example, LRU on a buffer of size $B$ will
+never replace more than twice as many elements as the optimal or clairvoyant algorithm on a 
+buffer of size $B/2$ \cite{2q-article}.
+
+This eviction policy is usually implemented with a doubly linked list to keep track of the
+access history of the pages and a hash table or array to keep track of the buffer location
+of the pages, so it can process each page access in $O(1)$ time.
+
+For LRU cache, we can implement each of the functions as follows:
+
+\begin{itemize}
+    \item \textbf{UpdateAccessHistory}(\textit{page}, \textit{tenant}): Move the page to the top of the list of the tenant.
+    \item \textbf{AddPageToCache}(\textit{page}, \textit{tenant}, \textit{buffer\_location}): Add the page to the top of the list of the tenant.
+    \item \textbf{EvictPage}(\textit{tenant\_to\_evict}): Evict the page from the bottom of the list of the tenant.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{\linewidth}
+    \begin{algorithm}[H]
+        \caption{LRU Cache Eviction Policy}
+        \begin{algorithmic}
+            \STATE \textbf{function} UpdateAccessHistory(page, tenant):
+            \STATE \hspace{\algorithmicindent} CacheList[tenant].MoveToTop(page)
+            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = CacheList[tenant].head
+            \STATE \textbf{end function}
+            \STATE
+            \STATE \textbf{function} AddPageToCache(page, tenant, buffer\_location):
+            \STATE \hspace{\algorithmicindent} CacheList[tenant].AddToTop(page)
+            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = CacheList[tenant].head
+            \STATE \textbf{end function}
+
+            \STATE
+            \STATE \textbf{function} EvictPage(tenant\_to\_evict):
+            \STATE \hspace{\algorithmicindent} page = CacheList[tenant\_to\_evict].tail
+            \STATE \hspace{\algorithmicindent} CacheList[tenant\_to\_evict].RemoveFromTail()
+            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} \textbf{return} page
+            \STATE \textbf{end function}
+        \end{algorithmic}
+    \end{algorithm}
+    \caption{LRU Cache Eviction Policy}
+    \label{fig:lru}
+    \end{minipage}
+\end{figure}
+
+CacheList is a doubly linked list per tenant, that keeps the pages in the cache,
+in the order of the access history, the head of the list is the most recently used
+page.
+
+CacheLocations is a hash map or array that keeps the location of the pages in the cache,
+so we can process each page access in $O(1)$ time.
+
 \subsection{LFU}
 
+Least Frequently Used (LFU) \cite{wikipedia-lfu} is a cache eviction policy that evicts
+the page that was least frequently used, and if there is a tie (two or more pages have
+the same frequency of use), it evicts the page that was least recently used. 
+\cite{cache-management-algorithms-for-flexible-filesystems}
+
+It is based on the idea that the pages accessed most frequently are the most likely 
+to be accessed in the near future. 
+
+When the probability distribution of the data access pattern is constant over time, LFU 
+yields the highest performance \cite{lfu-highest-perf-zipf} \cite{lfu-highest-perf-inproc} \cite{tiny-lfu},
+but in most practical workloads, the access frequency changes radically over time. For
+example, in a video caching service; a video clip that is really popular on a 
+given day might not be accessed a few days later. Hence, there is no point in 
+keeping that item in cache once its popularity has faded just because it was once very 
+popular \cite{tiny-lfu}.
+
+In the ideal LFU, we would keep a counter of the number of accesses of each page,
+even if the page is not in the cache, but this is not practical in real applications,
+since it requires memory proportional to the number of pages accessed, therefore, in 
+practice, frequency counter is kept in the cache, and it is forgotten when the page is
+evicted \cite{wikipedia-lfu}.
+
+Single tenant LFU can be implemented in $O(1)$ time \cite{o-1-lfu}, but it needs to keep
+track of the frequency of the least frequently used page, and to keep this efficiently,
+it relies on the fact that each time a page is evicted, a new page is added to the cache,
+so it can update the frequency of the least frequently used page easily, but in multi-tenant
+caching, we can evict a page from one tenant and add a page from another tenant, so we would
+need to keep track of the frequency of the least frequently used page for each tenant in a
+different way, which is not practical.
+
+Due to this, we can not implement LFU in multi-tenant caching in $O(1)$ time, we would need
+to use then a heap to keep track of the frequency of the pages, and a hash map or array to 
+keep track of the locations of the pages, so we can implement LFU in multi-tenant caching 
+in $O(\log n)$ time, where $n$ is the number of pages in the cache.
+
+For LFU cache, we can implement each of the functions as follows:
+
+\begin{itemize}
+    \item \textbf{UpdateAccessHistory}(\textit{page}, \textit{tenant}): Increase the frequency of the page in the cache of the tenant, and update the heap.
+    \item \textbf{AddPageToCache}(\textit{page}, \textit{tenant}, \textit{buffer\_location}): Add the page to the heap of the tenant, with the frequency of 1.
+    \item \textbf{EvictPage}(\textit{tenant\_to\_evict}): Evict the page with the least frequency from the heap of the tenant.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{\linewidth}
+    \begin{algorithm}[H]
+        \caption{LFU Cache Eviction Policy}
+        \begin{algorithmic}
+            \STATE \textbf{function} UpdateAccessHistory(page, tenant):
+            \STATE \hspace{\algorithmicindent} pageInHeap = CacheLocations[tenant][page]
+            \STATE \hspace{\algorithmicindent} pageInHeap.frequency += 1
+            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = pageInHeap
+            \STATE \hspace{\algorithmicindent} CacheHeaps[tenant].\textbf{heapify}(pageInHeap)
+            \STATE \textbf{end function}
+            \STATE
+            \STATE \textbf{function} AddPageToCache(page, tenant, buffer\_location):
+            \STATE \hspace{\algorithmicindent} pageInHeap = \textbf{new} PageInHeap(page = page, frequency = 1, buffer\_location = buffer\_location)
+            \STATE \hspace{\algorithmicindent} CacheHeaps[tenant].\textbf{insert}(pageInHeap)
+            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = pageInHeap
+            \STATE \textbf{end function}
+
+            \STATE
+            \STATE \textbf{function} EvictPage(tenant\_to\_evict):
+            \STATE \hspace{\algorithmicindent} page = CacheHeaps[tenant\_to\_evict].\textbf{extract\_min}()
+            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} \textbf{return} page
+            \STATE \textbf{end function}
+        \end{algorithmic}
+    \end{algorithm}
+    \caption{LFU Cache Eviction Policy}
+    \label{fig:lfu}
+    \end{minipage}
+\end{figure}
+
+CacheHeaps is a min heap per tenant, that keeps the pages in the cache, in the order of the
+frequency of the pages, the root of the heap is the page with the least frequency.
+
+CacheLocations is a hash map or array that keeps the location of the pages in the cache,
+so we can process each page access in $O(1)$ time.
+
+\subsection{LRU-2}
+
+LRU-2 is a generalization of LRU, where LRU is LRU-1, and it is a special case of LRU-k, 
+where $k = 2$. It is a cache eviction policy whose idea is to keep track of 
+the second most recent refence of each page, using this information to estimate the 
+inter-reference time of each page \cite{lru-k}.
+
+Unlike LRU, LRU-2 is scan resistant, since it gives low priority to pages that have been 
+scanned or to pages that belong to a big randomly accessed file \cite{2q-article}, and it 
+does not suffer so much from access pattern changes like LFU, because of the correlated 
+reference period \cite{lru-k}.
+
+Correlated references are references that are close to each other in time, it has been 
+shown that they are common in real workloads. They have been described in the literature 
+\cite{lru-k} \cite{2q-article} \cite{lrfu-article}.
+
+In order to handle the correlated references, and to be more resistant to access pattern 
+changes, LRU-2 has a tunable parameter, the Correlated Reference Period, which is the
+time window or number of references that are considered to be correlated.
+
+LRU-2 evicts the page that has the smallest second-to-last access time, among the pages
+that are not in the Correlated Reference Period.
+
+In LRU-2, there is a need of keeping in memory a history of pages that are not in the 
+cache, for example, if a page $p$ is accessed, it's recorded and stored in a buffer. If 
+$p$ wasn't accessed recently enough to remember, its second to last access will be 0, 
+and it will be evicted. To prevent cycling $p$ in and out of memory without recognizing 
+its frequent use, we retain its access history for a while after its last access, this is 
+called the Retained Information Period \cite{lru-k} \cite{2q-article}.
+
+In the literature \cite{lru-k} LRU-2 is proposed to be implemented in an asynchronous way,
+with separate processes or threads to handle pages that are no longer in the Correlated 
+Reference Period, or pages that are no longer in the Retained Information Period, but in 
+this thesis we will implement it in a synchronous, by defining the Correlated Reference
+Period and the Retained Information Period in terms of the number of references.
+
+Pages in the Correlated Reference Period will be handled in a FIFO list, pages in the cache
+that are not in the Correlated Reference Period will be handled in a heap, since we need
+to evict from these pages based on the second-to-last access time, pages in the Retained
+Information Period could be handled with another heap to delete based on the second-to-last
+access time, but to avoid additional overhead, since LRU-2 is already complex, we will
+handle them in a FIFO list without affecting the performance of the algorithm too much
+(note that using this, they will be evicted based on the time they were removed from the 
+cache, but since this pages are not in the cache anymore, it will not affect much the performance
+of the algorithm). 
+
+For LRU-2 cache, we can implement each of the functions as follows:
+
+\begin{itemize}
+    \item \textbf{UpdateAccessHistory}(\textit{page}, \textit{tenant}): If the page is 
+    in Correlated Reference Period, just update its last access time (do not update the 
+    second-to-last access time, since it is a correlated reference), if the page is not 
+    in the Correlated Reference Period, remove it from the heap, update its last and
+    second-to-last access time, and add it to the front of the Correlated Reference 
+    Period FIFO list, move last correlated page to the heap if needed.
+    \item \textbf{AddPageToCache}(\textit{page}, \textit{tenant}, \textit{buffer\_location}): 
+    Add the page to the front of the Correlated Reference Period FIFO list, move last 
+    correlated page to the heap if needed.
+    \item \textbf{EvictPage}(\textit{tenant\_to\_evict}): Evict the page on the top of 
+    the heap (or from the FIFO list if the heap is empty), remove it and add it to the 
+    Retained Information Period FIFO list, remove the last page from the Retained
+    Information Period FIFO list if needed.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{\linewidth}
+    \begin{algorithm}[H]
+        \caption{LRU-2 Cache Eviction Policy}
+        \begin{algorithmic}
+            \STATE \textbf{function} UpdateAccessHistory(page, tenant):
+            \STATE \hspace{\algorithmicindent} \textbf{if} CRP\_Locations[tenant][page] != null \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInCRP = CRP\_Locations[tenant][page]
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInCRP.last\_access = current\_time
+            \STATE \hspace{\algorithmicindent} \textbf{else}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page = HeapLocations[tenant][page]
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CacheHeaps[tenant].\textbf{remove}(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} HeapLocations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page.second\_to\_last\_access = page.last\_access
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page.last\_access = current\_time
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CRP\_List[tenant].\textbf{add\_to\_front}(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CRP\_Locations[tenant][page] = CRP\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if} CRP\_List[tenant].\textbf{size}() $>$ CRP\_Size[tenant] \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} MoveLastPageInCRPToHeap(tenant)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \textbf{end function}
+            \STATE
+            \STATE \textbf{function} AddPageToCache(page, tenant, buffer\_location):
+            \STATE \hspace{\algorithmicindent} \textbf{if} RIP\_Locations[tenant][page] != null \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInRIP = RIP\_Locations[tenant][page]
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} second\_to\_last\_access = pageInRIP.last\_access
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_List[tenant].\textbf{remove}(pageInRIP)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_Locations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} \textbf{else}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} second\_to\_last\_access = 0
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \hspace{\algorithmicindent} pageInCRP = \textbf{new} PageInCRP(page = page, last\_access = current\_time, second\_to\_last\_access = second\_to\_last\_access, buffer\_location = buffer\_location)
+            \STATE \hspace{\algorithmicindent} CRP\_List[tenant].\textbf{add\_to\_front}(pageInCRP)
+            \STATE \hspace{\algorithmicindent} CRP\_Locations[tenant][page] = CRP\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \textbf{if} CRP\_List[tenant].\textbf{size}() $>$ CRP\_Size[tenant] \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} MoveLastPageInCRPToHeap(tenant)
+            \STATE \hspace{\algorithmicindent} \textbf{end if} 
+            \STATE \textbf{end function}
+
+            \STATE
+            \STATE \textbf{function} EvictPage(tenant\_to\_evict):
+            \STATE \hspace{\algorithmicindent} \textbf{if} \textbf{not} CacheHeaps[tenant\_to\_evict].\textbf{empty}() \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page = CacheHeaps[tenant\_to\_evict].\textbf{extract\_min}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CRP\_Locations[tenant\_to\_evict][page] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} AddPageToRIPList(tenant\_to\_evict, page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} page
+            \STATE \hspace{\algorithmicindent} \textbf{else}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page = CRP\_List[tenant\_to\_evict].\textbf{extract\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CRP\_Locations[tenant\_to\_evict][page] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} AddPageToRIPList(tenant\_to\_evict, page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} page
+            \STATE \textbf{end function}
+        \end{algorithmic}
+    \end{algorithm}
+    \caption{LRU-2 Cache Eviction Policy}
+    \label{fig:lru-2}
+    \end{minipage}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{\linewidth}
+    \begin{algorithm}[H]
+        \begin{algorithmic}
+            \STATE \textbf{function} MoveLastPageInCRPToHeap(tenant):
+            \STATE \hspace{\algorithmicindent} page = CRP\_List[tenant].tail
+            \STATE \hspace{\algorithmicindent} CRP\_List[tenant].\textbf{remove}(page)
+            \STATE \hspace{\algorithmicindent} CRP\_Locations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} HeapLocations[tenant][page] = CacheHeaps[tenant].\textbf{insert}(page)
+            \STATE \textbf{end function}
+            \STATE
+            \STATE \textbf{function} AddPageToRIPList(tenant, page):
+            \STATE \hspace{\algorithmicindent} \textbf{if} RIP\_Locations[tenant][page] != null \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInRIP = RIP\_Locations[tenant][page]
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInRIP.last\_access = page.last\_access
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInRIP.second\_to\_last\_access = page.second\_to\_last\_access
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_List[tenant].\textbf{move\_to\_front}(pageInRIP)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_Locations[tenant][page] = RIP\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \textbf{else}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_List[tenant].\textbf{add\_to\_front}(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_Locations[tenant][page] = RIP\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if} RIP\_List[tenant].\textbf{size}() $>$ RIP\_Size[tenant] \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_List[tenant].\textbf{remove\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \textbf{end function}
+        \end{algorithmic}
+    \end{algorithm}
+    \caption{Helper Functions for LRU-2 Cache Eviction Policy}
+    \label{fig:lru-2-helper}
+    \end{minipage}
+\end{figure}
+
+CRP\_List is a FIFO list per tenant, that keeps the pages in the cache that are in the
+Correlated Reference Period, in the order of the access history.
+
+CRP\_Locations is a hash map or array that keeps the location of the pages in the cache
+that are in the Correlated Reference Period.
+
+CacheHeaps is a min heap per tenant, that keeps the pages in the cache that are not in the
+Correlated Reference Period, in the order of the second-to-last access time, the root of
+the heap is the page with the smallest second-to-last access time.
+
+HeapLocations is a hash map or array that keeps the location of the pages in the heap 
+of each tenant's cache, that are not in the Correlated Reference Period.
+
+RIP\_List is a FIFO list per tenant, that keeps the pages that are not in the cache anymore, 
+but are in the Retained Information Period.
+
+RIP\_Locations is a hash map or array that keeps the location of the pages in the Retained
+Information Period.
+
 \subsection{2Q}
+
+2Q is a cache eviction policy that uses two queues, a FIFO queue for the
+cold pages and a LRU queue for the hot pages.
+
+Like LRU-2, 2Q is scan resistant, since it gives low priority to pages that have been
+scanned or to pages that belong to a big randomly accessed file. It
+is claimed to have similar performance to LRU-2, with less overhead \cite{2q-article}.
+
+2Q algorithms maintains a FIFO queue A1in, with the pages that are cold, are in the cache
+and were accessed recently, similar to the Correlated Reference Period in LRU-2.
+
+It maintains another FIFO queue A1out, with the pages that are cold, but are not in 
+the cache anymore, similar to the Retained Information Period in LRU-2.
+
+It maintains a LRU queue Am, with the pages that are hot, which are all in the cache.
+
+For 2Q cache, we can implement each of the functions as follows:
+
+\begin{itemize}
+    \item \textbf{UpdateAccessHistory}(\textit{page}, \textit{tenant}): If the page is 
+    in Am queue, move it to the top of the Am queue, if the page is in A1in queue, do
+    nothing since it is a correlated reference.
+    \item \textbf{AddPageToCache}(\textit{page}, \textit{tenant}, \textit{buffer\_location}): If
+    the page is in A1out queue, remove it from the A1out queue, and add it to the Am queue,
+    otherwise, add it to the A1in queue.
+    \item \textbf{EvictPage}(\textit{tenant\_to\_evict}): If the ratio of the number of pages
+    in the A1in queue with respect to the number of pages in the cache of the tenant is bigger
+    than a threshold, evict the page from the tail of the A1in queue, add it to the head of the
+    A1out queue, and remove the page from the tail of the A1out queue if needed, otherwise, evict
+    the page from the tail of the Am queue, and do not add it to the A1out queue since it has not
+    been accessed in a while.
+\end{itemize}
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{\linewidth}
+    \begin{algorithm}[H]
+        \caption{2Q Cache Eviction Policy}
+        \begin{algorithmic}
+            \STATE \textbf{function} UpdateAccessHistory(page, tenant):
+            \STATE \hspace{\algorithmicindent} \textbf{if} Am\_Locations[tenant][page] != null \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_List[tenant].MoveToTop(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_Locations[tenant][page] = Am\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \textbf{end function}
+            \STATE
+            \STATE \textbf{function} AddPageToCache(page, tenant, buffer\_location):
+            \STATE \hspace{\algorithmicindent} \textbf{if} A1out\_Locations[tenant][page] != null \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInA1out = A1out\_Locations[tenant][page]
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_List[tenant].Remove(pageInA1out)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_Locations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_List[tenant].AddToTop(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_Locations[tenant][page] = Am\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \textbf{else}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1in\_List[tenant].AddToTop(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1in\_Locations[tenant][page] = A1in\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \textbf{end function}
+
+            \STATE
+            \STATE \textbf{function} EvictPage(tenant\_to\_evict):
+            \STATE \hspace{\algorithmicindent} TenantCacheUsed = A1in\_Size[tenant\_to\_evict].\textbf{size}() + Am\_Size[tenant\_to\_evict].\textbf{size}()
+            \STATE \hspace{\algorithmicindent} \textbf{if} (A1in\_List[tenant\_to\_evict].\textbf{size}() / TenantCacheUsed $>$ A1in\_Threshold \textbf{and not} A1in\_List[tenant\_to\_evict].\textbf{empty}()) \textbf{or} Am\_List[tenant\_to\_evict].\textbf{empty}() \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page = A1in\_List[tenant\_to\_evict].\textbf{remove\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} AddPageToA1OutList(tenant\_to\_evict, page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} page
+            \STATE \hspace{\algorithmicindent} \textbf{else}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page = Am\_List[tenant\_to\_evict].\textbf{remove\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_Locations[tenant\_to\_evict][page] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} page
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \textbf{end function}
+        \end{algorithmic}
+    \end{algorithm}
+    \begin{algorithm}[H]
+        \begin{algorithmic}
+            \STATE \textbf{function} AddPageToA1OutList(tenant, page):
+            \STATE \hspace{\algorithmicindent} \textbf{if} A1out\_Locations[tenant][page] == null \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_List[tenant].\textbf{add\_to\_front}(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_Locations[tenant][page] = A1out\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if} A1out\_List[tenant].\textbf{size}() / TenantCacheSizeRecommendation[tenant] $>$ A1out\_Threshold \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} evictedPage = A1out\_List[tenant].\textbf{remove\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_Locations[tenant][evictedPage] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \textbf{end function}
+        \end{algorithmic}
+    \end{algorithm}
+    \caption{2Q Cache Eviction Policy}
+    \label{fig:2q}
+    \end{minipage}
+\end{figure}
+
+\newpage
+
+A1in\_List is a FIFO list per tenant, that keeps the pages in the cache that are cold, are
+in the cache and were accessed recently, similar to the Correlated Reference Period in LRU-2.
+
+A1in\_Locations is a hash map or array that keeps the location of the pages in A1in\_List.  
+
+A1out\_List is a FIFO list per tenant, that keeps the pages in the cache that are cold, but
+are not in the cache anymore, similar to the Retained Information Period in LRU-2.
+
+A1out\_Locations is a hash map or array that keeps the location of the pages in A1out\_List.
+
+Am\_List is a doubly linked list per tenant, that keeps the pages in the cache that are hot,
+which are all in the cache.
+
+Am\_Locations is a hash map or array that keeps the location of the pages in the cache of each
+tenant.
+
+A1in\_Treshold is a tunable parameter that defines the ratio of the number of pages in the A1in
+queue with respect to the number of pages in the cache, it is claimed that 0.25 works well in
+most cases \cite{2q-article}.
+
+A1out\_Treshold is a tunable parameter that defines the ratio of the number of pages in the A1out
+queue with respect to the cache size recommendation, it is claimed that 0.5 works well in most
+cases \cite{2q-article}.
+
+TenantCacheSizeRecommendation is the cache size recommendation for each tenant.
 
 \subsection{MQ}
 
 \subsection{LIRS}
 
-\subsection{LRU-2}
 
 \subsection{LRFU}
 
 \subsection{Bélády Optimum (for comparison)}
-
-\lipsum[1-2]
