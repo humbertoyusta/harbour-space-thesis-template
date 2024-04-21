@@ -742,8 +742,8 @@ In order to evict pages that were accessed frequently in the past, but not acces
 MQ demotes pages to lower queues after a certain period of time $lifeTime$ after the last access, this is
 a tunable parameter \cite{mq-article}.
 
-In order to handle demotion, every time a page enters a queue, a value $expireTime$ is set to $currentTime + lifeTime$.
-After each access, queues are adjusted, if the $expireTime$ of the tail of a queue is less than the current time, the page
+In order to handle demotion, every time a page enters a queue, its value $expireTime$ is set to $currentTime + lifeTime$.
+After each access, queues are adjusted, if the $expireTime$ of a queue's tail page is less than the current time, the page
 is moved to the next lower queue, and the $expireTime$ is updated to $currentTime + lifeTime$.
 
 Here time is measured as logical time, that is, the number of accesses, in order to isolate 
@@ -823,6 +823,7 @@ To handle the demotion of pages, the method \textbf{AdjustQueues} will be called
     \begin{algorithm}[H]
         \begin{algorithmic}
             \STATE \textbf{function} AddPageToQout(tenant, page):
+            \STATE \hspace{\algorithmicindent} Qout\_List[tenant].\textbf{add\_to\_front}(page)
             \STATE \hspace{\algorithmicindent} Qout\_Locations[tenant][page] = Qout\_List[tenant].\textbf{head}
             \STATE \hspace{\algorithmicindent} \textbf{if} A1out\_List[tenant].\textbf{size}() / TenantCacheSizeRecommendation[tenant] $>$ A1out\_Threshold \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} evictedPage = Qout\_List[tenant].\textbf{remove\_from\_tail}()
@@ -891,33 +892,33 @@ frequency, using the IRR and and it does not suffer too much from access pattern
 The algorithm dinamically and responsively distinguishes between low and high IRR \cite{lirs-article}.
 
 A small portion on the cache is used for the HIR pages, the HIR pages that are in the cache
-are called Resident HIR pages. Some HIR blocks will not be in the cache, but still will be
-recorded for some time.
+are called Resident HIR pages. Some HIR blocks that were evicted recently, could be kept 
+recorded for some time, these are called Non-Resident HIR pages.
 
-The LIRS list is maintained, it will contain all the LIRS pages, and some of the HIR pages 
+The LIRS list is maintained, it contains all the LIRS pages, and some of the HIR pages 
 which can be resident or not (Fig \ref{fig:lirs_and_hirs_lists}), it is maintained in such a 
 way that the last page of the LIRS list is a LIRS page. In order to maintain this property,
 the LIRS list is pruned after each operation (the last pages that are not LIRS pages are removed)
 \cite{lirs-article}.
 
+HIRS list contains the resident HIR pages, regardless if they are in the LIRS list or not 
+(Fig \ref{fig:lirs_and_hirs_lists}).
+
 When a page is accessed, if it was in the LIRS list, it will become a LIRS page (if it was not)
 and it will be moved to the front of the LIRS list. If it was not in the LIRS list, it will be
 added to the front of the HIRS and LIRS lists, but marked as a HIR page.
 
-There is a tunable parameter \textbf{LIRS\_Threshold}, that defines the ratio of the number of
+A tunable parameter \textbf{LIRS\_Threshold} defines the ratio of the number of
 LIRS pages with respect to the cache size, after each operation, if the number of LIRS pages is
 bigger than this threshold, the last page of the LIRS list will be moved to the HIR list, and
 the LIRS list will be pruned.
-
-HIRS list will contain the resident HIR pages, regardless if they are in the LIRS list or not 
-(Fig \ref{fig:lirs_and_hirs_lists}).
 
 \begin{figure}[H]
     \centering
     \begin{minipage}{0.5\textwidth}
         \centering
         \includegraphics[width=\textwidth]{lirs_and_hirs_lists.png}
-        \caption{LIRS and HIR lists}
+        \caption{LIRS and HIRS lists}
         \label{fig:lirs_and_hirs_lists}
     \end{minipage}
     \hfill
@@ -929,19 +930,19 @@ For LIRS cache, we can implement each of the functions as follows:
     \item \textbf{UpdateAccessHistory}(\textit{page}, \textit{tenant}): If it is a LIR page, move it
     to the front of the LIRS list. If it is a HIR page that is on the LIRS list, it is recent, mark it 
     as a LIRS page, and move it to the front of the LIRS list. If it is a HIR page that is not on the LIRS
-    list, it is not recent enough to be on the LIRS list, then add it to the front of the HIRS list, and 
-    add it to the front of the LIRS list, but as a HIR page.
+    list, it is not recent enough to be on the LIRS list, then add it to the front of the HIRS and LIRS lists,
+    but marked as a HIR page.
     \item \textbf{AddPageToCache}(\textit{page}, \textit{tenant}, \textit{buffer\_location}): If the page 
     is a non-resident HIR page that is in the LIRS list, move it to the front of the LIRS list, and make it a 
-    LIRS page. If the page is not in the LIRS list, add it to the front of the LIRS and HIR lists, but mark it
+    LIRS page. If the page is not in the LIRS list, add it to the front of the LIRS and HIRS lists, but mark it
     as a HIR page.
     \item \textbf{EvictPage}(\textit{tenant\_to\_evict}): If the HIRS list is not empty, evict the page from the 
-    tail of the HIRS list, and update it in the LIRS list to mark it as non-resident HIR page. If the HIRS list is
-    empty, evict the page from the tail of the LIRS list.
+    tail of the HIRS list, and update it in the LIRS list to mark it as non-resident HIR page (if it is there). 
+    If the HIRS list is empty, evict the page from the tail of the LIRS list.
 \end{itemize}
 
-After each operation, we will prune the LIRS list if needed, and check if the tail of 
-the LIRS list should be moved to the HIR list.
+After each operation, LIRS list will be pruned, and the last page of the LIRS list will be moved 
+to the HIRS list if needed.
 
 Each operation can be implemented in amortized $O(1)$ time, and the complexity overhead 
 of LIRS is low \cite{lirs-article}.
