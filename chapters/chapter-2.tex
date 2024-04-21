@@ -1012,9 +1012,9 @@ of LIRS is low \cite{lirs-article}.
 
 \newpage
 
-After each function, \textbf{UpdateAccessHistory}, \textbf{AddPageToCache}, and \textbf{EvictPage} finishes, we will
-call \textbf{PruneLIRSList}, and \textbf{MoveLIRSTailToHIRSIfNecessary} to move the
-tail of the LIRS list to the HIRS list if needed.
+After each function, \textbf{UpdateAccessHistory}, \textbf{AddPageToCache}, and \textbf{EvictPage} 
+finishes, we will call \textbf{PruneLIRSList}, and \textbf{MoveLIRSTailToHIRSIfNecessary} with the 
+given tenant.
 
 \begin{figure}[htbp]
     \centering
@@ -1057,7 +1057,7 @@ LIRS\_Threshold is a tunable parameter that defines the ratio of the number of L
 respect to the total number of pages in the cache.
 
 In LIRS\_List, a counter of the number of LIRS pages is maintained, this counter is updated after 
-each operation.
+each operation, and it is used allow $O(1)$ computation of \textbf{number\_of\_LIRS\_pages}()
 
 \subsection{LRFU}
 
