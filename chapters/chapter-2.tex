@@ -234,7 +234,7 @@ is being accessed.
 
 
 In case of not changing recommendation, like in the case of comparing to the cache of
-the promised size, this policy makes our algorihtm behabe like a static cache algorithm
+the promised size, this policy makes our algorithm behave like a static cache algorithm
 for each tenant.
 
 This policy requires no additional overhead, since it only needs to keep track of the
@@ -626,6 +626,10 @@ For 2Q cache, we can implement each of the functions as follows:
     the page from the tail of the Am queue, and do not add it to the A1out queue since it has not
     been accessed in a while.
 \end{itemize}
+
+Note that each operation can be easily implemented in $O(1)$ time, and 2Q does not increase 
+the overhead of simple LRU by more than a constant factor \cite{2q-article}.
+
 \begin{figure}[htbp]
     \centering
     \begin{minipage}{\linewidth}
@@ -670,14 +674,12 @@ For 2Q cache, we can implement each of the functions as follows:
     \begin{algorithm}[H]
         \begin{algorithmic}
             \STATE \textbf{function} AddPageToA1OutList(tenant, page):
-            \STATE \hspace{\algorithmicindent} \textbf{if} A1out\_Locations[tenant][page] == null \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_List[tenant].\textbf{add\_to\_front}(page)
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_Locations[tenant][page] = A1out\_List[tenant].head
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if} A1out\_List[tenant].\textbf{size}() / TenantCacheSizeRecommendation[tenant] $>$ A1out\_Threshold \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} evictedPage = A1out\_List[tenant].\textbf{remove\_from\_tail}()
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_Locations[tenant][evictedPage] = null
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{end if}
-            \STATE \hspace{\algorithmicindent} \textbf{end if}
             \STATE \textbf{end function}
         \end{algorithmic}
     \end{algorithm}
@@ -715,6 +717,168 @@ cases \cite{2q-article}.
 TenantCacheSizeRecommendation is the cache size recommendation for each tenant.
 
 \subsection{MQ}
+
+It has been shown that a good cache eviction policy should satisfy the following properties:
+
+\begin{enumerate}
+    \item \textbf{Minimal lifetime:} Warm pages should not be evicted too soon (for 
+    example, MRU does not satisfy this property).
+    \item \textbf{Frequency-based priority:} Pages should be prioritized based on their 
+    frequencies. (LFU satisfies this property, but LRU does not).
+    \item \textbf{Temporal frequency:} Pages accessed frequently in the past, but not 
+    accessed in a relatively long time, should be evicted (LRU satisfies this property, 
+    but LFU does not).
+\end{enumerate}
+
+Multi-Queue (MQ) is a cache eviction policy that aims to satisfy all these properties \cite{mq-article}
+by maintaining pages with different access frequencies in the cache for different time periods.
+
+It uses multiple LRU queues $Q_0, Q_1, \ldots, Q_{m-1}$, where $m$ is a tunable parameter, pages in $Q_j$
+have a longer lifetime than pages in $Q_{i}$ for $i < j$ \cite{mq-article}.
+
+MQ uses a memory buffer $Q_{out}$ to remember recently evicted pages for a period of time, similarly to
+2Q algorithm \cite{2q-article} or the Retained Information Period in LRU-2. It is handled by a 
+FIFO queue of limited size.
+
+On a cache hit to page $p$, $p$ is first removed from current LRU queue, and then added to 
+$Q_{\text{num\_queue(frequency(p))}}$, that is, we insert it on a queue based on the frequency of the page,
+for example, $\text{num\_queue(f)}$ can be defined as $\log_2(f)$, where $f$ is the frequency of the page.
+Then the $8$th access of a page will promote it from $Q_2$ to $Q_3$.
+
+In order to evict pages that were accessed frequently in the past, but not accessed in a relatively long time,
+MQ demotes pages to lower queues after a certain period of time $lifeTime$ after the last access, this is
+a tunable parameter.
+
+In order to handle demotion, every time a page enters a queue, a value $expireTime$ is set to $currentTime + lifeTime$.
+After each access, queues are adjusted, if the $expireTime$ of the tail of a queue is less than the current time, the page
+is moved to the next lower queue, and the $expireTime$ is updated to $currentTime + lifeTime$.
+
+Here time is measured as logical time, that is, the number of accesses, in order to isolate 
+this parameters from multi-tenancy, we will keep a separate logical time for each tenant.
+
+For MQ cache, we can implement each of the functions as follows:
+
+\begin{itemize}
+    \item \textbf{UpdateAccessHistory}(\textit{page}, \textit{tenant}): Remove the page from the
+    current LRU queue, update its frequency, and add it to the corresponding LRU queue based on the
+    frequency of the page using $\text{num\_queue}(\text{frequency}(page))$.
+    \item \textbf{AddPageToCache}(\textit{page}, \textit{tenant}, \textit{buffer\_location}): If 
+    $page$ is in $Q_{out}$, remove it from $Q_{out}$, and add it to the corresponding LRU queue based
+    on the frequency of the page using $\text{num\_queue}(\text{frequency}(page))$, otherwise, add it
+    to $Q_0$.
+    \item \textbf{EvictPage}(\textit{tenant\_to\_evict}): Evict the page from the tail of the LRU queue with the
+    smallest index that is not empty, and add it to $Q_{out}$, remove the page from the tail of $Q_{out}$ if needed.
+\end{itemize}
+
+Each operation can be implemented in $O(1)$ or $O(q)$ time, where $q$ is the number of LRU queues,
+this number is a tunable parameter, and it is usally very small, in most cases less than 10 \cite{mq-article}.
+
+To handle the demotion of pages, the method \textbf{AdjustQueues} will be called for each tenant after each access.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{\linewidth}
+    \begin{algorithm}[H]
+        \caption{MQ Cache Eviction Policy}
+        \begin{algorithmic}
+            \STATE \textbf{function} UpdateAccessHistory(page, tenant):
+            \STATE \hspace{\algorithmicindent} (pageInLRUQueue, currentQueue) = LRUQueueLocations[tenant][page]
+            \STATE \hspace{\algorithmicindent} LRUQueues[tenant][currentQueue].Remove(pageInLRUQueue)
+            \STATE \hspace{\algorithmicindent} page.frequency = page.frequency + 1
+            \STATE \hspace{\algorithmicindent} queueToAdd = num\_queue(page.frequency)
+            \STATE \hspace{\algorithmicindent} page.expireTime = currentTime[tenant] + lifeTime[tenant]
+            \STATE \hspace{\algorithmicindent} LRUQueues[tenant][queueToAdd].AddToTop(page)
+            \STATE \hspace{\algorithmicindent} LRUQueueLocations[tenant][page] = (LRUQueues[tenant][queueToAdd].head, queueToAdd)
+            \STATE \textbf{end function}
+            \STATE
+            \STATE \textbf{function} AddPageToCache(page, tenant, buffer\_location):
+            \STATE \hspace{\algorithmicindent} \textbf{if} Qout\_Locations[tenant][page] != null \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInQout = Qout\_Locations[tenant][page]
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageFrequency = page.frequency + 1
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Qout\_List[tenant].Remove(pageInQout)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Qout\_Locations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} \textbf{else}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageFrequency = 1
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \hspace{\algorithmicindent} queueToAdd = num\_queue(pageFrequency)
+            \STATE \hspace{\algorithmicindent} page.expireTime = currentTime[tenant] + lifeTime[tenant]
+            \STATE \hspace{\algorithmicindent} LRUQueues[tenant][queueToAdd].AddToTop(page)
+            \STATE \hspace{\algorithmicindent} LRUQueueLocations[tenant][page] = (LRUQueues[tenant][queueToAdd].head, queueToAdd)
+            \STATE \textbf{end function}
+
+            \STATE
+            \STATE \textbf{function} EvictPage(tenant\_to\_evict):
+            \STATE \hspace{\algorithmicindent} \textbf{for} $i = 0$ \textbf{to} $q - 1$ \textbf{do}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if} \textbf{not} LRUQueues[tenant\_to\_evict][i].\textbf{empty}() \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageToEvict = LRUQueues[tenant\_to\_evict][i].\textbf{remove\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} LRUQueueLocations[tenant\_to\_evict][pageToEvict] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} AddPageToQout(tenant\_to\_evict, pageToEvict)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} pageToEvict
+            \STATE \textbf{end function}
+        \end{algorithmic}
+    \end{algorithm}
+    \caption{MQ Cache Eviction Policy}
+    \label{fig:mq}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{\linewidth}
+    \begin{algorithm}[H]
+        \begin{algorithmic}
+            \STATE \textbf{function} AddPageToQout(tenant, page):
+            \STATE \hspace{\algorithmicindent} Qout\_Locations[tenant][page] = Qout\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \textbf{if} A1out\_List[tenant].\textbf{size}() / TenantCacheSizeRecommendation[tenant] $>$ A1out\_Threshold \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} evictedPage = Qout\_List[tenant].\textbf{remove\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Qout\_Locations[tenant][evictedPage] = null
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \textbf{end function}
+            \STATE 
+            \STATE \textbf{function} AdjustQueues(tenant, was\_accessed\_now):
+            \STATE \hspace{\algorithmicindent} \textbf {if} was\_accessed\_now \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} currentTime[tenant] = currentTime[tenant] + 1
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \hspace{\algorithmicindent} \textbf{for} $i = 1$ \textbf{to} $q - 1$ \textbf{do}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} tailPage = LRUQueues[tenant][i].tail
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if} tailPage.expireTime $<$ currentTime[tenant] \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} LRUQueues[tenant][i].\textbf{remove}(tailPage)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} tailPage.expireTime = currentTime[tenant] + lifeTime[tenant]
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} LRUQueues[tenant][i - 1].\textbf{add\_to\_front}(tailPage)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} LRUQueueLocations[tenant][tailPage] = (LRUQueues[tenant][i - 1].head, i - 1)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{end if}
+        \end{algorithmic}
+    \end{algorithm}
+    \caption{Helper Functions for MQ Cache Eviction Policy}
+    \label{fig:mq-helper}
+    \end{minipage}
+\end{figure}
+
+\newpage
+
+LRUQueues is an array of doubly linked lists per tenant, that keeps the pages in the cache,
+each list is an LRU queue, and the index of the list is the queue number.
+
+LRUQueueLocations is a hash map or array that keeps the location of the pages in the LRU queues,
+each location is a tuple with the location in the LRU queue and the queue number.
+
+Qout\_List is a FIFO list per tenant, that keeps the pages in the cache that are not in the cache
+anymore, but were recently evicted.
+
+Qout\_Locations is a hash map or array that keeps the location of the pages in the Qout list.
+
+num\_queue is a function that returns the queue number based on the frequency of the page,
+it is usually defined as $\log_2(f)$, where $f$ is the frequency of the page.
+
+TenantCacheSizeRecommendation is the cache size recommendation for each tenant.
+
+A1out\_Treshold is a tunable parameter that defines the ratio of the number of pages in the A1out
+queue with respect to the cache size recommendation.
+
+lifeTime is a tunable parameter that defines the time a page can stay in a queue without being accessed,
+it is separate for each tenant, and it is usually defined as a fraction of the cache size recommendation.
+
+currentTime is a logical time that is incremented after each access, it is separate for each tenant.
 
 \subsection{LIRS}
 
