@@ -52,28 +52,28 @@ buffer allocation was proposed in \cite{article-for-2level-forecasting}.
             \STATE $(\text{buffer\_location}, \text{is\_hit}) \leftarrow \text{GetPageLocationIfItIsInCache}(\text{page} = p, \text{tenant} = t)$
             \IF {$\text{is\_hit}$}
                 \STATE $\text{CacheEvictionPolicy.UpdateAccessHistory}(\text{page} = p, \text{tenant} = t)$
-                \RETURN $(b = \text{buffer\_location}, h = \text{true})$
+                \RETURN $(b = \text{buffer\_location}, h = \textbf{true})$
             \ELSE
                 \STATE \COMMENT {Page is not in cache, we need to find a place for it}
                 \IF {There is available space in cache}
                     \STATE $\text{available\_location} \leftarrow \text{GetAvailableBufferLocation}()$ \COMMENT {Get the first available buffer location}
                     \STATE $\text{CacheEvictionPolicy.AddPageToCache(\text{page} = p, \text{tenant} = t, \text{available\_location})}$
-                    \RETURN $(b = \text{available\_location}, h = \text{false})$
+                    \RETURN $(b = \text{available\_location}, h = \textbf{false})$
                 \ELSE
                     \STATE \COMMENT {Cache is full, we need to evict a page}
                     \STATE $\text{tenant\_to\_evict} \leftarrow \text{TenantSelectionPolicy.GetTenantToEvict}()$
                     \STATE $\text{evicted\_page} \leftarrow \text{CacheEvictionPolicy.EvictPage}(\text{tenant\_to\_evict})$
                     \STATE $b \leftarrow \text{evicted\_page.buffer\_location}$
                     \STATE $\text{CacheEvictionPolicy.AddPageToCache}(\text{page} = p, \text{tenant} = t, \text{buffer\_location} = b)$
-                    \RETURN $(b, h = \text{false})$
+                    \RETURN $(b, h = \textbf{false})$
                 \ENDIF
             \ENDIF
             \STATE
             \STATE \textbf{function} GetPageLocationIfItIsInCache(page, tenant):
             \STATE \hspace{\algorithmicindent} \textbf{if} page is in cache \textbf{then}
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} $(\text{page.buffer\_location}, \text{true})$
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} $(\text{page.buffer\_location}, \textbf{true})$
             \STATE \hspace{\algorithmicindent} \textbf{else}
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} $(\text{null}, \text{false})$
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} $(\textbf{null}, \textbf{false})$
             \STATE \hspace{\algorithmicindent} \textbf{end if}
             \STATE \textbf{end function}
         \end{algorithmic}
@@ -304,20 +304,19 @@ For LRU cache, we can implement each of the functions as follows:
         \caption{LRU Cache Eviction Policy}
         \begin{algorithmic}
             \STATE \textbf{function} UpdateAccessHistory(page, tenant):
-            \STATE \hspace{\algorithmicindent} CacheList[tenant].MoveToTop(page)
-            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = CacheList[tenant].head
+            \STATE \hspace{\algorithmicindent} CacheList[tenant].\textbf{move\_to\_top}(CacheLocations[tenant][page])
+            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = CacheList[tenant].\textbf{head}
             \STATE \textbf{end function}
             \STATE
             \STATE \textbf{function} AddPageToCache(page, tenant, buffer\_location):
-            \STATE \hspace{\algorithmicindent} CacheList[tenant].AddToTop(page)
-            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = CacheList[tenant].head
+            \STATE \hspace{\algorithmicindent} CacheList[tenant].\textbf{add\_to\_top}(page)
+            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = CacheList[tenant].\textbf{head}
             \STATE \textbf{end function}
 
             \STATE
             \STATE \textbf{function} EvictPage(tenant\_to\_evict):
-            \STATE \hspace{\algorithmicindent} page = CacheList[tenant\_to\_evict].tail
-            \STATE \hspace{\algorithmicindent} CacheList[tenant\_to\_evict].RemoveFromTail()
-            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} page = CacheList[tenant\_to\_evict].\textbf{remove\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = \textbf{null}
             \STATE \hspace{\algorithmicindent} \textbf{return} page
             \STATE \textbf{end function}
         \end{algorithmic}
@@ -401,7 +400,7 @@ For LFU cache, we can implement each of the functions as follows:
             \STATE
             \STATE \textbf{function} EvictPage(tenant\_to\_evict):
             \STATE \hspace{\algorithmicindent} page = CacheHeaps[tenant\_to\_evict].\textbf{extract\_min}()
-            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} CacheLocations[tenant][page] = \textbf{null}
             \STATE \hspace{\algorithmicindent} \textbf{return} page
             \STATE \textbf{end function}
         \end{algorithmic}
@@ -488,17 +487,17 @@ For LRU-2 cache, we can implement each of the functions as follows:
         \caption{LRU-2 Cache Eviction Policy}
         \begin{algorithmic}
             \STATE \textbf{function} UpdateAccessHistory(page, tenant):
-            \STATE \hspace{\algorithmicindent} \textbf{if} CRP\_Locations[tenant][page] != null \textbf{then}
+            \STATE \hspace{\algorithmicindent} \textbf{if} CRP\_Locations[tenant][page] != \textbf{null} \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInCRP = CRP\_Locations[tenant][page]
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInCRP.last\_access = current\_time
             \STATE \hspace{\algorithmicindent} \textbf{else}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page = HeapLocations[tenant][page]
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CacheHeaps[tenant].\textbf{remove}(page)
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} HeapLocations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} HeapLocations[tenant][page] = \textbf{null}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page.second\_to\_last\_access = page.last\_access
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page.last\_access = current\_time
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CRP\_List[tenant].\textbf{add\_to\_front}(page)
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CRP\_Locations[tenant][page] = CRP\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CRP\_Locations[tenant][page] = CRP\_List[tenant].\textbf{head}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if} CRP\_List[tenant].\textbf{size}() $>$ CRP\_Size[tenant] \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} MoveLastPageInCRPToHeap(tenant)
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{end if}
@@ -506,17 +505,17 @@ For LRU-2 cache, we can implement each of the functions as follows:
             \STATE \textbf{end function}
             \STATE
             \STATE \textbf{function} AddPageToCache(page, tenant, buffer\_location):
-            \STATE \hspace{\algorithmicindent} \textbf{if} RIP\_Locations[tenant][page] != null \textbf{then}
+            \STATE \hspace{\algorithmicindent} \textbf{if} RIP\_Locations[tenant][page] != \textbf{null} \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInRIP = RIP\_Locations[tenant][page]
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} second\_to\_last\_access = pageInRIP.last\_access
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_List[tenant].\textbf{remove}(pageInRIP)
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_Locations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_Locations[tenant][page] = \textbf{null}
             \STATE \hspace{\algorithmicindent} \textbf{else}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} second\_to\_last\_access = 0
             \STATE \hspace{\algorithmicindent} \textbf{end if}
             \STATE \hspace{\algorithmicindent} pageInCRP = \textbf{new} PageInCRP(page = page, last\_access = current\_time, second\_to\_last\_access = second\_to\_last\_access, buffer\_location = buffer\_location)
             \STATE \hspace{\algorithmicindent} CRP\_List[tenant].\textbf{add\_to\_front}(pageInCRP)
-            \STATE \hspace{\algorithmicindent} CRP\_Locations[tenant][page] = CRP\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} CRP\_Locations[tenant][page] = CRP\_List[tenant].\textbf{head}
             \STATE \hspace{\algorithmicindent} \textbf{if} CRP\_List[tenant].\textbf{size}() $>$ CRP\_Size[tenant] \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} MoveLastPageInCRPToHeap(tenant)
             \STATE \hspace{\algorithmicindent} \textbf{end if} 
@@ -526,12 +525,12 @@ For LRU-2 cache, we can implement each of the functions as follows:
             \STATE \textbf{function} EvictPage(tenant\_to\_evict):
             \STATE \hspace{\algorithmicindent} \textbf{if} \textbf{not} CacheHeaps[tenant\_to\_evict].\textbf{empty}() \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page = CacheHeaps[tenant\_to\_evict].\textbf{extract\_min}()
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CRP\_Locations[tenant\_to\_evict][page] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CRP\_Locations[tenant\_to\_evict][page] = \textbf{null}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} AddPageToRIPList(tenant\_to\_evict, page)
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} page
             \STATE \hspace{\algorithmicindent} \textbf{else}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page = CRP\_List[tenant\_to\_evict].\textbf{extract\_from\_tail}()
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CRP\_Locations[tenant\_to\_evict][page] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} CRP\_Locations[tenant\_to\_evict][page] = \textbf{null}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} AddPageToRIPList(tenant\_to\_evict, page)
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} page
             \STATE \textbf{end function}
@@ -547,25 +546,19 @@ For LRU-2 cache, we can implement each of the functions as follows:
     \begin{algorithm}[H]
         \begin{algorithmic}
             \STATE \textbf{function} MoveLastPageInCRPToHeap(tenant):
-            \STATE \hspace{\algorithmicindent} page = CRP\_List[tenant].tail
+            \STATE \hspace{\algorithmicindent} page = CRP\_List[tenant].\textbf{tail}
             \STATE \hspace{\algorithmicindent} CRP\_List[tenant].\textbf{remove}(page)
-            \STATE \hspace{\algorithmicindent} CRP\_Locations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} CRP\_Locations[tenant][page] = \textbf{null}
             \STATE \hspace{\algorithmicindent} HeapLocations[tenant][page] = CacheHeaps[tenant].\textbf{insert}(page)
             \STATE \textbf{end function}
             \STATE
             \STATE \textbf{function} AddPageToRIPList(tenant, page):
-            \STATE \hspace{\algorithmicindent} \textbf{if} RIP\_Locations[tenant][page] != null \textbf{then}
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInRIP = RIP\_Locations[tenant][page]
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInRIP.last\_access = page.last\_access
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInRIP.second\_to\_last\_access = page.second\_to\_last\_access
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_List[tenant].\textbf{move\_to\_front}(pageInRIP)
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_Locations[tenant][page] = RIP\_List[tenant].head
-            \STATE \hspace{\algorithmicindent} \textbf{else}
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_List[tenant].\textbf{add\_to\_front}(page)
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_Locations[tenant][page] = RIP\_List[tenant].head
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if} RIP\_List[tenant].\textbf{size}() $>$ RIP\_Size[tenant] \textbf{then}
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_List[tenant].\textbf{remove\_from\_tail}()
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \hspace{\algorithmicindent} RIP\_List[tenant].\textbf{add\_to\_front}(page)
+            \STATE \hspace{\algorithmicindent} RIP\_Locations[tenant][page] = RIP\_List[tenant].\textbf{head}
+            \STATE \hspace{\algorithmicindent} \textbf{if} RIP\_List[tenant].\textbf{size}() $>$ RIP\_Size[tenant] \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} evictedPage = RIP\_List[tenant].\textbf{remove\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} RIP\_Locations[tenant][evictedPage] = \textbf{null}
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
             \STATE \textbf{end function}
         \end{algorithmic}
     \end{algorithm}
@@ -637,22 +630,22 @@ the overhead of simple LRU by more than a constant factor \cite{2q-article}.
         \caption{2Q Cache Eviction Policy}
         \begin{algorithmic}
             \STATE \textbf{function} UpdateAccessHistory(page, tenant):
-            \STATE \hspace{\algorithmicindent} \textbf{if} Am\_Locations[tenant][page] != null \textbf{then}
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_List[tenant].MoveToTop(page)
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_Locations[tenant][page] = Am\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \textbf{if} Am\_Locations[tenant][page] != \textbf{null} \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_List[tenant].\textbf{move\_to\_top}(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_Locations[tenant][page] = Am\_List[tenant].\textbf{head}
             \STATE \hspace{\algorithmicindent} \textbf{end if}
             \STATE \textbf{end function}
             \STATE
             \STATE \textbf{function} AddPageToCache(page, tenant, buffer\_location):
-            \STATE \hspace{\algorithmicindent} \textbf{if} A1out\_Locations[tenant][page] != null \textbf{then}
+            \STATE \hspace{\algorithmicindent} \textbf{if} A1out\_Locations[tenant][page] != \textbf{null} \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInA1out = A1out\_Locations[tenant][page]
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_List[tenant].Remove(pageInA1out)
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_Locations[tenant][page] = null
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_List[tenant].AddToTop(page)
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_Locations[tenant][page] = Am\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_List[tenant].\textbf{remove}(pageInA1out)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_Locations[tenant][page] = \textbf{null}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_List[tenant].\textbf{add\_to\_front}(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_Locations[tenant][page] = Am\_List[tenant].\textbf{head}
             \STATE \hspace{\algorithmicindent} \textbf{else}
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1in\_List[tenant].AddToTop(page)
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1in\_Locations[tenant][page] = A1in\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1in\_List[tenant].\textbf{add\_to\_front}(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1in\_Locations[tenant][page] = A1in\_List[tenant].\textbf{head}
             \STATE \hspace{\algorithmicindent} \textbf{end if}
             \STATE \textbf{end function}
 
@@ -665,7 +658,7 @@ the overhead of simple LRU by more than a constant factor \cite{2q-article}.
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} page
             \STATE \hspace{\algorithmicindent} \textbf{else}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page = Am\_List[tenant\_to\_evict].\textbf{remove\_from\_tail}()
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_Locations[tenant\_to\_evict][page] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Am\_Locations[tenant\_to\_evict][page] = \textbf{null}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} page
             \STATE \hspace{\algorithmicindent} \textbf{end if}
             \STATE \textbf{end function}
@@ -675,10 +668,10 @@ the overhead of simple LRU by more than a constant factor \cite{2q-article}.
         \begin{algorithmic}
             \STATE \textbf{function} AddPageToA1OutList(tenant, page):
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_List[tenant].\textbf{add\_to\_front}(page)
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_Locations[tenant][page] = A1out\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_Locations[tenant][page] = A1out\_List[tenant].\textbf{head}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if} A1out\_List[tenant].\textbf{size}() / TenantCacheSizeRecommendation[tenant] $>$ A1out\_Threshold \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} evictedPage = A1out\_List[tenant].\textbf{remove\_from\_tail}()
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_Locations[tenant][evictedPage] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} A1out\_Locations[tenant][evictedPage] = \textbf{null}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{end if}
             \STATE \textbf{end function}
         \end{algorithmic}
@@ -743,18 +736,18 @@ FIFO queue of limited size.
 On a cache hit to page $p$, $p$ is first removed from current LRU queue, and then added to 
 $Q_{\text{num\_queue(frequency(p))}}$, that is, we insert it on a queue based on the frequency of the page,
 for example, $\text{num\_queue(f)}$ can be defined as $\log_2(f)$, where $f$ is the frequency of the page.
-Then the $8$th access of a page will promote it from $Q_2$ to $Q_3$.
+Then the $8$th access of a page will promote it from $Q_2$ to $Q_3$ \cite{mq-article}.
 
 In order to evict pages that were accessed frequently in the past, but not accessed in a relatively long time,
 MQ demotes pages to lower queues after a certain period of time $lifeTime$ after the last access, this is
-a tunable parameter.
+a tunable parameter \cite{mq-article}.
 
 In order to handle demotion, every time a page enters a queue, a value $expireTime$ is set to $currentTime + lifeTime$.
 After each access, queues are adjusted, if the $expireTime$ of the tail of a queue is less than the current time, the page
 is moved to the next lower queue, and the $expireTime$ is updated to $currentTime + lifeTime$.
 
 Here time is measured as logical time, that is, the number of accesses, in order to isolate 
-this parameters from multi-tenancy, we will keep a separate logical time for each tenant.
+this parameters from multi-tenancy, we will keep a separate logical time for each tenant \cite{mq-article}.
 
 For MQ cache, we can implement each of the functions as follows:
 
@@ -783,27 +776,27 @@ To handle the demotion of pages, the method \textbf{AdjustQueues} will be called
         \begin{algorithmic}
             \STATE \textbf{function} UpdateAccessHistory(page, tenant):
             \STATE \hspace{\algorithmicindent} (pageInLRUQueue, currentQueue) = LRUQueueLocations[tenant][page]
-            \STATE \hspace{\algorithmicindent} LRUQueues[tenant][currentQueue].Remove(pageInLRUQueue)
+            \STATE \hspace{\algorithmicindent} LRUQueues[tenant][currentQueue].\textbf{remove}(pageInLRUQueue)
             \STATE \hspace{\algorithmicindent} page.frequency = page.frequency + 1
-            \STATE \hspace{\algorithmicindent} queueToAdd = num\_queue(page.frequency)
+            \STATE \hspace{\algorithmicindent} queueToAdd = \textbf{num\_queue}(page.frequency)
             \STATE \hspace{\algorithmicindent} page.expireTime = currentTime[tenant] + lifeTime[tenant]
-            \STATE \hspace{\algorithmicindent} LRUQueues[tenant][queueToAdd].AddToTop(page)
-            \STATE \hspace{\algorithmicindent} LRUQueueLocations[tenant][page] = (LRUQueues[tenant][queueToAdd].head, queueToAdd)
+            \STATE \hspace{\algorithmicindent} LRUQueues[tenant][queueToAdd].\textbf{add\_to\_top}(page)
+            \STATE \hspace{\algorithmicindent} LRUQueueLocations[tenant][page] = (LRUQueues[tenant][queueToAdd].\textbf{head}, queueToAdd)
             \STATE \textbf{end function}
             \STATE
             \STATE \textbf{function} AddPageToCache(page, tenant, buffer\_location):
-            \STATE \hspace{\algorithmicindent} \textbf{if} Qout\_Locations[tenant][page] != null \textbf{then}
+            \STATE \hspace{\algorithmicindent} \textbf{if} Qout\_Locations[tenant][page] != \textbf{null} \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInQout = Qout\_Locations[tenant][page]
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageFrequency = page.frequency + 1
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Qout\_List[tenant].Remove(pageInQout)
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Qout\_Locations[tenant][page] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Qout\_List[tenant].\textbf{remove}(pageInQout)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Qout\_Locations[tenant][page] = \textbf{null}
             \STATE \hspace{\algorithmicindent} \textbf{else}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageFrequency = 1
             \STATE \hspace{\algorithmicindent} \textbf{end if}
-            \STATE \hspace{\algorithmicindent} queueToAdd = num\_queue(pageFrequency)
+            \STATE \hspace{\algorithmicindent} queueToAdd = \textbf{num\_queue}(pageFrequency)
             \STATE \hspace{\algorithmicindent} page.expireTime = currentTime[tenant] + lifeTime[tenant]
-            \STATE \hspace{\algorithmicindent} LRUQueues[tenant][queueToAdd].AddToTop(page)
-            \STATE \hspace{\algorithmicindent} LRUQueueLocations[tenant][page] = (LRUQueues[tenant][queueToAdd].head, queueToAdd)
+            \STATE \hspace{\algorithmicindent} LRUQueues[tenant][queueToAdd].\textbf{add\_to\_top}(page)
+            \STATE \hspace{\algorithmicindent} LRUQueueLocations[tenant][page] = (LRUQueues[tenant][queueToAdd].\textbf{head}, queueToAdd)
             \STATE \textbf{end function}
 
             \STATE
@@ -811,7 +804,7 @@ To handle the demotion of pages, the method \textbf{AdjustQueues} will be called
             \STATE \hspace{\algorithmicindent} \textbf{for} $i = 0$ \textbf{to} $q - 1$ \textbf{do}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if} \textbf{not} LRUQueues[tenant\_to\_evict][i].\textbf{empty}() \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageToEvict = LRUQueues[tenant\_to\_evict][i].\textbf{remove\_from\_tail}()
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} LRUQueueLocations[tenant\_to\_evict][pageToEvict] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} LRUQueueLocations[tenant\_to\_evict][pageToEvict] = \textbf{null}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} AddPageToQout(tenant\_to\_evict, pageToEvict)
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} pageToEvict
             \STATE \textbf{end function}
@@ -822,16 +815,18 @@ To handle the demotion of pages, the method \textbf{AdjustQueues} will be called
     \end{minipage}
 \end{figure}
 
+\newpage
+
 \begin{figure}[htbp]
     \centering
     \begin{minipage}{\linewidth}
     \begin{algorithm}[H]
         \begin{algorithmic}
             \STATE \textbf{function} AddPageToQout(tenant, page):
-            \STATE \hspace{\algorithmicindent} Qout\_Locations[tenant][page] = Qout\_List[tenant].head
+            \STATE \hspace{\algorithmicindent} Qout\_Locations[tenant][page] = Qout\_List[tenant].\textbf{head}
             \STATE \hspace{\algorithmicindent} \textbf{if} A1out\_List[tenant].\textbf{size}() / TenantCacheSizeRecommendation[tenant] $>$ A1out\_Threshold \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} evictedPage = Qout\_List[tenant].\textbf{remove\_from\_tail}()
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Qout\_Locations[tenant][evictedPage] = null
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} Qout\_Locations[tenant][evictedPage] = \textbf{null}
             \STATE \hspace{\algorithmicindent} \textbf{end if}
             \STATE \textbf{end function}
             \STATE 
@@ -840,21 +835,21 @@ To handle the demotion of pages, the method \textbf{AdjustQueues} will be called
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} currentTime[tenant] = currentTime[tenant] + 1
             \STATE \hspace{\algorithmicindent} \textbf{end if}
             \STATE \hspace{\algorithmicindent} \textbf{for} $i = 1$ \textbf{to} $q - 1$ \textbf{do}
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} tailPage = LRUQueues[tenant][i].tail
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} tailPage = LRUQueues[tenant][i].\textbf{tail}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if} tailPage.expireTime $<$ currentTime[tenant] \textbf{then}
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} LRUQueues[tenant][i].\textbf{remove}(tailPage)
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} tailPage.expireTime = currentTime[tenant] + lifeTime[tenant]
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} LRUQueues[tenant][i - 1].\textbf{add\_to\_front}(tailPage)
-            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} LRUQueueLocations[tenant][tailPage] = (LRUQueues[tenant][i - 1].head, i - 1)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} LRUQueueLocations[tenant][tailPage] = (LRUQueues[tenant][i - 1].\textbf{head}, i - 1)
             \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \hspace{\algorithmicindent} \textbf{end for}
+            \STATE \textbf{end function}
         \end{algorithmic}
     \end{algorithm}
     \caption{Helper Functions for MQ Cache Eviction Policy}
     \label{fig:mq-helper}
     \end{minipage}
 \end{figure}
-
-\newpage
 
 LRUQueues is an array of doubly linked lists per tenant, that keeps the pages in the cache,
 each list is an LRU queue, and the index of the list is the queue number.
@@ -868,7 +863,7 @@ anymore, but were recently evicted.
 Qout\_Locations is a hash map or array that keeps the location of the pages in the Qout list.
 
 num\_queue is a function that returns the queue number based on the frequency of the page,
-it is usually defined as $\log_2(f)$, where $f$ is the frequency of the page.
+it is usually defined as $\log_2(f)$, where $f$ is the frequency of the page \cite{mq-article}.
 
 TenantCacheSizeRecommendation is the cache size recommendation for each tenant.
 
@@ -882,6 +877,187 @@ currentTime is a logical time that is incremented after each access, it is separ
 
 \subsection{LIRS}
 
+Low Inter-reference Recency Set (LIRS) is a cache eviction policy that uses the number 
+of references between the last two references to a page, called Inter-reference recency
+(IRR) to split the pages in the cache into two sets, the Low IRR set (LIRS) and the 
+High IRR set (HIRS) \cite{lirs-article}.
+
+It assumes that if the IRR of a page is large, the next IRR will be large as well. Following
+this assumption, blocks with large IRRs are chosen for eviction \cite{lirs-article}.
+
+LIRS is scan resistant, considers not only the recency of the page, but also the
+frequency, using the IRR and and it does not suffer too much from access pattern changes.
+
+In LIRS, a LIRS list of pages and a HIR list of pages are maintained, it dinamically and 
+responsively distinguishes between low and high IRR \cite{lirs-article}.
+
+A small portion on the cache is used for the HIR pages, the HIR pages that are in the cache
+are called Resident HIR pages. Some HIR blocks will not be in the cache, but still will be
+recorded for some time.
+
+The LIRS list is maintained, it will contain all the LIRS pages, and some of the HIR pages 
+which can be resident or not (Fig \ref{fig:lirs_and_hirs_lists}), it is maintained in such a 
+way that the last page of the LIRS list is a LIRS page. In order to maintain this property,
+the LIRS list is pruned after each operation (the last pages that are not LIRS pages are removed)
+\cite{lirs-article}.
+
+When a page is accessed, if it was in the LIRS list, it will become a LIRS page (if it was not)
+and it will be moved to the front of the LIRS list. If it was not in the LIRS list, it will be
+added to the front of the HIRS and LIRS lists, but marked as a HIR page.
+
+There is a tunable parameter \textbf{LIRS\_Threshold}, that defines the ratio of the number of
+LIRS pages with respect to the cache size, after each operation, if the number of LIRS pages is
+bigger than this threshold, the last page of the LIRS list will be moved to the HIR list, and
+the LIRS list will be pruned.
+
+HIRS list will contain the resident HIR pages, regardless if they are in the LIRS list or not 
+(Fig \ref{fig:lirs_and_hirs_lists}).
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{lirs_and_hirs_lists.png}
+        \caption{LIRS and HIR lists}
+        \label{fig:lirs_and_hirs_lists}
+    \end{minipage}
+    \hfill
+\end{figure}
+
+For LIRS cache, we can implement each of the functions as follows:
+
+\begin{itemize}
+    \item \textbf{UpdateAccessHistory}(\textit{page}, \textit{tenant}): If it is a LIR page, move it
+    to the front of the LIRS list. If it is a HIR page that is on the LIRS list, it is recent, mark it 
+    as a LIRS page, and move it to the front of the LIRS list. If it is a HIR page that is not on the LIRS
+    list, it is not recent enough to be on the LIRS list, then add it to the front of the HIRS list, and 
+    add it to the front of the LIRS list, but as a HIR page.
+    \item \textbf{AddPageToCache}(\textit{page}, \textit{tenant}, \textit{buffer\_location}): If the page 
+    is a non-resident HIR page that is in the LIRS list, move it to the front of the LIRS list, and make it a 
+    LIRS page. If the page is not in the LIRS list, add it to the front of the LIRS and HIR lists, but mark it
+    as a HIR page.
+    \item \textbf{EvictPage}(\textit{tenant\_to\_evict}): If the HIRS list is not empty, evict the page from the 
+    tail of the HIRS list, and update it in the LIRS list to mark it as non-resident HIR page. If the HIRS list is
+    empty, evict the page from the tail of the LIRS list.
+\end{itemize}
+
+After each operation, we will prune the LIRS list if needed, and check if the tail of 
+the LIRS list should be moved to the HIR list.
+
+Each operation can be implemented in amortized $O(1)$ time, and the complexity overhead 
+of LIRS is low \cite{lirs-article}.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{\linewidth}
+    \begin{algorithm}[H]
+        \caption{LIRS Cache Eviction Policy}
+        \begin{algorithmic}
+            \STATE \textbf{function} UpdateAccessHistory(page, tenant):
+            \STATE \hspace{\algorithmicindent} \textbf{if} LIRS\_Locations[tenant][page] != \textbf{null} \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInLIRS = LIRS\_Locations[tenant][page]
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if not} pageInLIRS.is\_LIR \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInLIRS.is\_LIR = \textbf{true}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInHirs = HIRS\_Locations[tenant][page]
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} HIRS\_List[tenant].Remove(pageInHirs)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} HIRS\_Locations[tenant][page] = \textbf{null}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} LIRS\_List[tenant].\textbf{move\_to\_front}(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} LIRS\_Locations[tenant][page] = LIRS\_List[tenant].\textbf{head}
+            \STATE \hspace{\algorithmicindent} \textbf{else}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInHirs = HIRS\_Locations[tenant][page]
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} HIRS\_List[tenant].\textbf{add\_to\_front}(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} HIRS\_Locations[tenant][page] = HIRS\_List[tenant].\textbf{head}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} LIRS\_List[tenant].\textbf{add\_to\_front}(page) \COMMENT {Marked as HIR}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} LIRS\_Locations[tenant][page] = LIRS\_List[tenant].\textbf{head}
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \textbf{end function}
+            \STATE
+            \STATE \textbf{function} AddPageToCache(page, tenant, buffer\_location):
+            \STATE \hspace{\algorithmicindent} \textbf{if} LIRS\_Locations[tenant][page] != \textbf{null} \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInLirs = LIRS\_Locations[tenant][page]
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInLirs.is\_LIR = \textbf{true}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} LIRS\_List[tenant].\textbf{move\_to\_front}(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} LIRS\_Locations[tenant][page] = LIRS\_List[tenant].\textbf{head}
+            \STATE \hspace{\algorithmicindent} \textbf{else}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} HIRS\_List[tenant].\textbf{add\_to\_front}(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} HIRS\_Locations[tenant][page] = HIRS\_List[tenant].\textbf{head}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} LIRS\_List[tenant].\textbf{add\_to\_front}(page) \COMMENT {Marked as HIR}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} LIRS\_Locations[tenant][page] = LIRS\_List[tenant].\textbf{head}
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \textbf{end function}
+
+            \STATE
+            \STATE \textbf{function} EvictPage(tenant\_to\_evict):
+            \STATE \hspace{\algorithmicindent} \textbf{if} \textbf{not} HIRS\_List[tenant\_to\_evict].\textbf{empty}() \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInHirs = HIRS\_List[tenant\_to\_evict].\textbf{remove\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} HIRS\_Locations[tenant\_to\_evict][pageInHirs] = \textbf{null}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{if} LIRS\_Locations[tenant\_to\_evict][pageInHirs] != \textbf{null} \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInLirs = LIRS\_Locations[tenant\_to\_evict][pageInHirs]
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInLirs.is\_LIR = \textbf{false}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} pageInHirs
+            \STATE \hspace{\algorithmicindent} \textbf{else}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInLirs = LIRS\_List[tenant\_to\_evict].\textbf{remove\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} LIRS\_Locations[tenant\_to\_evict][pageInLirs] = \textbf{null}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} \textbf{return} pageInLirs
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+            \STATE \textbf{end function}
+        \end{algorithmic}
+    \end{algorithm}
+    \caption{LIRS Cache Eviction Policy}
+    \label{fig:lirs}
+    \end{minipage}
+\end{figure}
+
+\newpage
+
+After each function, \textbf{UpdateAccessHistory}, \textbf{AddPageToCache}, and \textbf{EvictPage} finishes, we will
+call \textbf{PruneLIRSList}, and \textbf{MoveLIRSTailToHIRSIfNecessary} to move the
+tail of the LIRS list to the HIRS list if needed.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{\linewidth}
+    \begin{algorithm}[H]
+        \begin{algorithmic}
+            \STATE \textbf{function} PruneLIRSList(tenant):
+            \STATE \hspace{\algorithmicindent} \textbf{while} \textbf{not} LIRS\_List[tenant].\textbf{empty}() \textbf{and} \textbf{not} LIRS\_List[tenant].\textbf{tail}.is\_LIR \textbf{do}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} pageInLirs = LIRS\_List[tenant].\textbf{remove\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} LIRS\_Locations[tenant][pageInLirs] = \textbf{null}
+            \STATE \hspace{\algorithmicindent} \textbf{end while}
+            \STATE \textbf{end function}
+            \STATE
+            \STATE \textbf{function} MoveLIRSTailToHIRSIfNecessary(tenant):
+            \STATE \hspace{\algorithmicindent} tenantUsedCache = LIRS\_List[tenant].\textbf{number\_of\_LIRS\_pages}() + HIRS\_List[tenant].\textbf{size}()
+            \STATE \hspace{\algorithmicindent} \textbf{if} LIRS\_List[tenant].\textbf{number\_of\_LIRS\_pages}() / tenantUsedCache $>$ LIRS\_Threshold \textbf{then}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page = LIRS\_List[tenant].\textbf{remove\_from\_tail}()
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} LIRS\_Locations[tenant][page] = \textbf{null}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} page.is\_LIR = \textbf{false}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} HIRS\_List[tenant].\textbf{add\_to\_front}(page)
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} HIRS\_Locations[tenant][page] = HIRS\_List[tenant].\textbf{head}
+            \STATE \hspace{\algorithmicindent} \hspace{\algorithmicindent} PruneLIRSList(tenant)
+            \STATE \hspace{\algorithmicindent} \textbf{end if}
+        \end{algorithmic}
+    \end{algorithm}
+    \caption{Helper Functions for LIRS Cache Eviction Policy}
+    \label{fig:lirs-helper}
+    \end{minipage}
+\end{figure}
+
+LIRS\_List is a doubly linked list that keeps the pages in the cache that are in the LIRS list.
+
+LIRS\_Locations is a hash map or array that keeps the location of the pages in the LIRS list.
+
+HIRS\_List is a doubly linked list that keeps the pages in the cache that are in the HIRS list.
+
+HIRS\_Locations is a hash map or array that keeps the location of the pages in the HIRS list.
+
+LIRS\_Threshold is a tunable parameter that defines the ratio of the number of LIRS pages with 
+respect to the total number of pages in the cache.
+
+In LIRS\_List, a counter of the number of LIRS pages is maintained, this counter is updated after 
+each operation.
 
 \subsection{LRFU}
 
