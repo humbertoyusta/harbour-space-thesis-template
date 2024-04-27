@@ -49,21 +49,21 @@ buffer allocation was proposed in \cite{article-for-2level-forecasting}.
             \STATE \textbf{Input:} $(p, t)$ - The page id and tenant of the page to be accessed.
             \STATE \textbf{Output:} $(b, h)$ - The buffer location of the page accessed and whether it is a hit or not.
             \STATE
-            \STATE $(\text{buffer\_location}, \text{is\_hit}) \leftarrow \text{GetPageLocationIfItIsInCache}(\text{page} = p, \text{tenant} = t)$
+            \STATE $(\text{buffer\_location}, \text{is\_hit}) = \text{GetPageLocationIfItIsInCache}(\text{page} = p, \text{tenant} = t)$
             \IF {$\text{is\_hit}$}
                 \STATE $\text{CacheEvictionPolicy.UpdateAccessHistory}(\text{page} = p, \text{tenant} = t)$
                 \RETURN $(b = \text{buffer\_location}, h = \textbf{true})$
             \ELSE
                 \STATE \COMMENT {Page is not in cache, we need to find a place for it}
                 \IF {There is available space in cache}
-                    \STATE $\text{available\_location} \leftarrow \text{GetAvailableBufferLocation}()$ \COMMENT {Get the first available buffer location}
+                    \STATE $\text{available\_location} = \text{GetAvailableBufferLocation}()$ \COMMENT {Get the first available buffer location}
                     \STATE $\text{CacheEvictionPolicy.AddPageToCache(\text{page} = p, \text{tenant} = t, \text{available\_location})}$
                     \RETURN $(b = \text{available\_location}, h = \textbf{false})$
                 \ELSE
                     \STATE \COMMENT {Cache is full, we need to evict a page}
-                    \STATE $\text{tenant\_to\_evict} \leftarrow \text{TenantSelectionPolicy.GetTenantToEvict}()$
-                    \STATE $\text{evicted\_page} \leftarrow \text{CacheEvictionPolicy.EvictPage}(\text{tenant\_to\_evict})$
-                    \STATE $b \leftarrow \text{evicted\_page.buffer\_location}$
+                    \STATE $\text{tenant\_to\_evict} = \text{TenantSelectionPolicy.GetTenantToEvict}()$
+                    \STATE $\text{evicted\_page} = \text{CacheEvictionPolicy.EvictPage}(\text{tenant\_to\_evict})$
+                    \STATE $b = \text{evicted\_page.buffer\_location}$
                     \STATE $\text{CacheEvictionPolicy.AddPageToCache}(\text{page} = p, \text{tenant} = t, \text{buffer\_location} = b)$
                     \RETURN $(b, h = \textbf{false})$
                 \ENDIF
