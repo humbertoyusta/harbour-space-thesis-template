@@ -1061,4 +1061,109 @@ each operation, and it is used allow $O(1)$ computation of \textbf{number\_of\_L
 
 \subsection{LRFU}
 
+The Least Recently/Frequently Used (LRFU) is a spectrum of cache eviction policies between LRU and 
+LFU. 
+
+It associates Combined Recency and Frequency (CRF) value to each page, that quantifies the likelyhood
+of a page to be accessed in the near future. Each reference to a page contributes to the CRF value of
+the page, and this contribution is determined by a \textit{weighting function} $\mathcal{F}(x)$ where 
+$x$ is the number of accesses since the last reference to the page \cite{lrfu-article}.
+
+The CRF value of a page $p$ at time $t_{base}$ is defined as:
+
+$$
+\text{CRF}(p, t_{base}) = \sum_{i = 1}^{k} \mathcal{F}(t_{base} - t_{p_i})
+$$
+
+where $\mathcal{F}(x)$ is the \textit{weighting function}, $\{ t_{p_1}, t_{p_2}, \ldots, t_{p_k} \}$ are the 
+access times of the page $p$ and $t_{p_1} < t_{p_2} < \ldots < t_{p_k}$ \cite{lrfu-article}.
+
+If $\mathcal{F}(x) = c$ for all $x$, then LRFU is equivalent to LFU. If 
+$\forall i, \mathcal{F}(i) > \sum_{j = i + 1}^{\infty} \mathcal{F}(j)$, then LRFU is equivalent to LRU.
+
+A class of parametric weighting functions $\mathcal{F}(x)$ that satisfy the following properties in 
+their extreme cases is $\mathcal{F}(x) = (\frac{1}{2})^{\lambda x}$, here if $\lambda = 0$, then LRFU is
+equivalent to LFU, and if $\lambda = 1$, then LRFU is equivalent to LRU \cite{lrfu-article}. 
+
+An interesting property of the \textit{weighting function} $\mathcal{F}(x)$ is that 
+$\mathcal{F}(x+y) = \mathcal{F}(x) \cdot \mathcal{F}(y)$ \cite{lrfu-article}, which allows to update the CRF value of a 
+page in a simpler way after each access as follows:
+
+$$
+\text{CRF}(p, t_{p_k}) = \mathcal{F}(0) + \mathcal{F}(t_{p_k} - t_{p_{k-1}}) \cdot \text{CRF}(p, t_{p_{k-1}})
+$$
+
+Using this, only the last CRF value and the last access time of each page need to be maintained, and it 
+is simple to keep it updated after each access.
+
+Since the LRFU policy replaces the page with the smallest CRF value, it is important to keep the pages 
+sorted by CRF value, however, the CRF value of a page changes over time. Fortunately, with 
+$\mathcal{F}(x) = (\frac{1}{2})^{\lambda x}$, the relative order of two blocks does not change until 
+either of them is accessed. Therefore, if $\text{CRF}(p_1, t) < \text{CRF}(p_2, t)$ and neither 
+$p_1$ nor $p_2$ have been accessed since $t$, then $\text{CRF}(p_1, t') < \text{CRF}(p_2, t')$
+for all $t' \geq t$ \cite{lrfu-article}.
+
+In order to implement LRFU cache, we can use a min-heap to easily evict the page with the smallest 
+CRF value.
+
+Time is measured as logical time, and it is incremented after each access. It is possible to keep 
+current time per tenant or a global time, the difference is small in practice, we used a global time 
+since it showed better results.
+
+For LRFU cache, we can implement each of the functions as follows:
+
+\begin{itemize}
+    \item \textbf{UpdateAccessHistory}(\textit{page}, \textit{tenant}): Update the CRF value of the page after each access using the formula above, and heapify.
+    \item \textbf{AddPageToCache}(\textit{page}, \textit{tenant}, \textit{buffer\_location}): Add the page to the heap with the CRF value of the page.
+    \item \textbf{EvictPage}(\textit{tenant\_to\_evict}): Remove the page with the smallest CRF value from the heap, and return it.
+\end{itemize}
+
+\newpage
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{\linewidth}
+    \begin{algorithm}[H]
+        \caption{LRFU Cache Eviction Policy}
+        \begin{algorithmic}
+            \STATE \textbf{function} UpdateAccessHistory(page, tenant):
+            \STATE \hspace{\algorithmicindent} pageInHeap = HeapLocations[tenant][page]
+            \STATE \hspace{\algorithmicindent} pageInHeap.CRF = F(0) + F(currentTime - page.lastAccessTime) * pageInHeap.CRF
+            \STATE \hspace{\algorithmicindent} pageInHeap.lastAccessTime = currentTime
+            \STATE \hspace{\algorithmicindent} Heap[tenant].\textbf{heapify}(pageInHeap)
+            \STATE \textbf{end function}
+            \STATE
+            \STATE \textbf{function} AddPageToCache(page, tenant, buffer\_location):
+            \STATE \hspace{\algorithmicindent} page.CRF = F(0)
+            \STATE \hspace{\algorithmicindent} page.lastAccessTime = currentTime
+            \STATE \hspace{\algorithmicindent} Heap[tenant].\textbf{add}(page)
+            \STATE \hspace{\algorithmicindent} HeapLocations[tenant][page] = page
+            \STATE \textbf{end function}
+
+            \STATE
+            \STATE \textbf{function} EvictPage(tenant\_to\_evict):
+            \STATE \hspace{\algorithmicindent} pageToEvict = Heap[tenant\_to\_evict].\textbf{remove\_min}()
+            \STATE \hspace{\algorithmicindent} HeapLocations[tenant\_to\_evict][pageToEvict] = \textbf{null}
+            \STATE \hspace{\algorithmicindent} \textbf{return} pageToEvict
+            \STATE \textbf{end function}
+
+            \STATE
+            \STATE \textbf{function} F(x):
+            \STATE \hspace{\algorithmicindent} \textbf{return} $(\frac{1}{2})^{\lambda x}$
+            \STATE \textbf{end function}
+        \end{algorithmic}
+    \end{algorithm}
+    \caption{LRFU Cache Eviction Policy}
+    \label{fig:lrfu}
+    \end{minipage}
+\end{figure}
+
+Heap is a min-heap that keeps the pages in the cache, and it is sorted by the CRF value of the pages.
+
+HeapLocations is a hash map or array that keeps the location of the pages in the heap.
+
+$\lambda$ is a tunable parameter that defines the weighting function $\mathcal{F}(x)$.
+
+currentTime is a logical time that is incremented after each access.
+
 \subsection{Bélády Optimum (for comparison)}
