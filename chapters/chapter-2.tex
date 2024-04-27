@@ -1166,4 +1166,14 @@ $\lambda$ is a tunable parameter that defines the weighting function $\mathcal{F
 
 currentTime is a logical time that is incremented after each access.
 
-\subsection{Bélády Optimum (for comparison)}
+\subsection{Bélády's Optimal Algorithm}
+
+Bélády's Optimal Algorithm or the clairvoyant algorithm is the theoretical optimal cache eviction
+policy, it evicts the page that will be accessed the farthest in the future \cite{lecture-notes-1} 
+\cite{lecture-notes-2} \cite{article-for-belady-ref-1}.
+
+This is an offline policy, it needs to know the future accesses to the pages, therefore it is not
+practical for real-world applications, it is used here only as a benchmark to compare the performance 
+of other cache eviction policies, and see how close they are to the optimal policy.
+
+
