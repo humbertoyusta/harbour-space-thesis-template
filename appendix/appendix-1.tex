@@ -1,11 +1,28 @@
-\chapter{Appendix 1}
-\label{appendix:appendix1}
+\chapter{Brightkite Top 36 Users}
+\label{appendix:brightike-top-36-users}
 
-\begin{figure}[H]
+\begin{table}[ht]
     \centering
-    \includegraphics[width=0.3  \textwidth]{dummy.png}
-    \caption{Lorem ipsum dolor sit amet}
-    \label{fig:figAppendix-1}
-\end{figure}
+    \small
+    \caption{36 most challenging users in the Brightkite dataset.}
+    \csvautotabular{data/brightkite_top_36_users.csv}
+    \label{tab:brightkite-top-36-users}
+\end{table}
 
-\lipsum[1-1] \ref{fig:figAppendix-1}
+\newpage
+
+From each user we have:
+
+\begin{itemize}
+    \item \textbf{User ID}: The unique identifier of the user in the original BrightKite dataset.
+    \item \textbf{Number of Accesses}: The number of check-ins made by the user, this is used as the 
+    item or page accesses in the multi-tenant caching problem.
+    \item \textbf{Unique Items (Locations)}: The number of unique locations visited by the user, this is
+    the number of unique items or pages in the multi-tenant caching problem.
+    \item \textbf{Extra Cache Faults by Opt. Alg}: The number of extra cache faults that the optimal
+    (clairvoyant) cache algorithm has with a cache size of 50. By extra it means the number of cache
+    faults that are not inevitable, that is, all cache faults except the ones that are caused by the 
+    first access to an item.
+    \item \textbf{Rank}: The rank of the user in the dataset, based on the number of extra cache faults
+    by the optimal cache algorithm.
+\end{itemize}

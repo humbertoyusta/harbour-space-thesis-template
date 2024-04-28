@@ -1,12 +1,54 @@
 \chapter{Expermients and Methodology}
 
+\section{Introduction}
+
+This section will describe the experiments and methodology used to evaluate the proposed solutions. 
+The experiments will be conducted on two different datasets: BrightKite and CitiBike, which are 
+real-world datasets, and we will also include a synthetic dataset for parameter tuning.
+
 \section{Datasets}
 
 \subsection{BrightKite Data}
 
 \subsubsection{Overview}
 
+BrightKite was a location-based social network where users shared their locations by checking in at 
+different places.
+
+The dataset contains check-ins from users, and each check-in contains the user's ID, the location's ID, 
+the timestamp, and the location's geographical coordinates.
+
+BrightKite data was used by Thodoris Lykouris and Sergei Vassilvitskii in their paper "Competitive 
+Caching with Machine Learned Advice" \cite{datasets-reference} and the dataset is publicly available
+at \cite{brightkite-data}.
+
+From this dataset, we created multiple instances of the caching problem, by considering each user 
+as a tenant for our multi-tenant caching problem, location IDs as items or pages to be cached, and 
+check-ins as item or page accesses. 
+
 \subsubsection{Processing}
+
+Similar to the work done by Thodoris Lykouris and Sergei Vassilvitskii in \cite{datasets-reference},
+we selected the top users where the optimal cache algorithm (Belady's or clairvoyant) had more cache 
+faults, to select the most challenging instances from the dataset.
+
+Then we created 6 instances of the multi-tenant caching problem, by considering each of the most 
+challenging users as a tenant, the locations as items to be cached, and the check-ins as item accesses.
+
+We took 36 most challenging users from the dataset, and created 6 instances of the multi-tenant caching
+problem, two of them with 4 tenants, two with 5 tenants, one with 8 tenants, and one with 10 tenants.
+
+Information of the selected users, with number of accesses, number of unique items, and number of cache
+faults for the optimal cache algorithm (with cache size equal to 50), rank and user ID, is shown in
+Appendix \ref{appendix:brightike-top-36-users}.
+
+The number of accesses per user is from 1300 to 2100, with most of them having 2100. The number of
+unique items per user is from 300 to 1300, with many of them having around 600. The number of cache
+faults for the optimal cache algorithm is from 10 to 164, with most of them having around 20 or 30.
+
+To make the cache size recommendations per tenant, we started by some initial value, and kept increasing 
+it until the number of cache faults for the optimal cache algorithm was less than some threshold, in this
+case 40.
 
 \subsection{CitiBike Data}
 
