@@ -34,8 +34,8 @@ where each tenant has completely different workloads, data of one tenant is comp
 independent of the data of another tenant.
 
 We mainly consider small number of tenants, since it is common in possible applications, 
-experiments based on real data have 4 or 5 tenants, experiments on random data have up 
-to 10 tenants, however, the proposed algorithms also work for larger number of tenants.
+experiments have mainly 4 or 5 tenants, with some of them with up to 10 tenants, however, 
+the proposed algorithms also work for larger number of tenants.
 
 \subsection{Global, Static and Dynamic Buffer Allocation}
 
@@ -136,6 +136,19 @@ been proposed in the literature, like the hit ratio degradation (HRD), as the di
 in total hits, between the baseline and any scheme that assigns memory dynamically, 
 normalized by the total memory accesses \cite{buffer-sharing-1} or other quality of 
 service metrics like in \cite{learning-based-prediction}.
+
+\section{Minimum and Maximum Buffer Sizes}
+
+Since our main focus is dynamic buffer allocation, we will also define minimum and maximum 
+buffer sizes for each tenant, to guarantee a minimum performance goal for each tenant, and
+to avoid tenants taking too much buffer space.
+
+This approach was used in ICPC 2023 Online Spring Challenge powered by Huawei: Buffer Sharing in 
+Multi-Tenant Database Environment \cite{huawei-challenge}.
+
+Minimum and maximum buffer sizes can be defined based on the buffer size recommendations per tenant,
+for example, the minimal buffer size can be 40\% of the recommendation, and the maximal buffer size
+can be 250\% of the recommendation.
 
 \section{Penalty Function Optimization}
 
