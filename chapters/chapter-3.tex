@@ -2,9 +2,9 @@
 
 \section{Introduction}
 
-This section will describe the experiments and methodology used to evaluate the proposed solutions. 
-The experiments will be conducted on two different datasets: BrightKite and CitiBike, which are 
-real-world datasets, and we will also include a synthetic dataset for parameter tuning.
+This section describes the experiments and methodology used to evaluate the proposed solutions. 
+The experiments were conducted on two different datasets: BrightKite and CitiBike, which are 
+real-world datasets, and we included a synthetic dataset for parameter tuning.
 
 \section{Datasets}
 
@@ -54,7 +54,69 @@ case 40.
 
 \subsubsection{Overview}
 
+CitiBike is a popular bike-sharing service in New York City. We consider citibike trip histories, 
+in which each ride is a cache item access. Experiments were made with monthly data from 2023, 
+the dataset is publicly available at \cite{citibike-data}.
+
+The dataset contains information about each trip, the start and end station IDs, if the bike
+was electric or classic, data about the rider, if the rider is a member or a casual rider, 
+the start date and time that was used to sort the data, and more information not used in the 
+experiments.
+
+CitiBike data was also used by Thodoris Lykouris and Sergei Vassilvitskii in their paper "Competitive 
+Caching with Machine Learned Advice" \cite{datasets-reference}.
+
+We made artificial tenants by considering if the bike was electric or classic, and if the rider 
+was a member or a casual rider, therefore we have 4 tenants: electric members, electric casuals,
+classic members, and classic casuals.
+
 \subsubsection{Processing}
+
+We made three experiments: 
+
+\begin{itemize}
+    \item In the first one, we considered the pair (start\_station\_id, end\_station\_id) to be 
+    the items to be cached, so that two trips are only considered the same if they have the 
+    same start and end stations.
+    \item In the second one, we ranked start stations to numbers from 1 to the number of unique
+    start stations, and end stations to numbers from 1 to the number of unique end stations, so
+    and then considered the pair $(\lfloor \frac{start\_station\_rank}{5} \rfloor, \lfloor \frac{end\_station\_rank}{5} \rfloor)$ 
+    to be the items to be cached.
+    \item In the third one, we considered the start station ID to be the item to be cached.
+\end{itemize}
+
+The number of unique items and number of accesses in each experiment is shown on the following tables.
+
+\newpage
+
+\begin{table}[ht]
+    \centering
+    \small
+    \caption{Summary per tenant in the CitiBike experiment 1.}
+    \csvautotabular{data/citibike_exp_1_case_2_summary.csv}
+    \label{tab:citibike-exp-1-case-2-summary}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \small
+    \caption{Summary per tenant in the CitiBike experiment 2.}
+    \csvautotabular{data/citibike_exp_2_case_3_summary.csv}
+    \label{tab:citibike-exp-2-case-3-summary}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \small
+    \caption{Summary per tenant in the CitiBike experiment 3.}
+    \csvautotabular{data/citibike_exp_3_case_4_summary.csv}
+    \label{tab:citibike-exp-3-case-4-summary}
+\end{table}
+
+To make the cache size recommendations per tenant, we started by some initial value selected differently
+for each experiment, based on the number of unique items and number of accesses, and kept increasing it 
+until the number of cache faults for the optimal cache algorithm was less than some threshold, based 
+on percentage of the number of accesses.
 
 \subsection{Random Data}
 
