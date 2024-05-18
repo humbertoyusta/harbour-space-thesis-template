@@ -165,7 +165,28 @@ chunks.
 
 \subsection{Data Validation}
 
+In order to ensure the integrity of the data, we validated each case for the experiments and 
+the randomly generated data.
+
+For each case, we checked that each tenant had the correct number of accesses and the correct 
+number of unique items, both by script and by visually plotting the data to ensure it was 
+correctly generated.
+
+Additional integrity checks related to buffer sizes, priority levels, and tenant information 
+were also performed.
+
 \subsection{Algorithm Validation}
+
+In order to validate the algorithms, we simulated the cache eviction process for each case, 
+keeping track of the cache state and the cache faults, and performing integrity checks related 
+to the cache state, cache hits, and faults.
+
+Checks related to the tenant selection policy were performed to ensure that each tenant had at 
+least the minimum buffer size promised at any time, did not exceed the maximum buffer size 
+promised at any time, and was selected according to the tenant selection policy.
+
+Additional checks related to the cache eviction policy were performed to ensure that the 
+eviction policy was correctly implemented and worked as expected.
 
 \section{Experiments}
 
