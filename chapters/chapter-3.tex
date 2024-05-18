@@ -120,9 +120,46 @@ on percentage of the number of accesses.
 
 \subsection{Random Data}
 
+
 \subsubsection{Overview}
 
+Random data was used for hyperparameter tuning, testing, and validation of the algorithms, 
+but not in the experiments.
+
+It has been shown that when the probability distribution of the data access pattern is constant 
+over time, LFU yields the highest performance \cite{lfu-highest-perf-zipf} 
+\cite{lfu-highest-perf-inproc} \cite{tiny-lfu}. Therefore, we did not generate data using only 
+one probability distribution, as this would favor LFU and not take into account the problem of 
+changing access patterns over time.
+
 \subsubsection{Generation}
+
+To generate random data, we used the following probability distributions:
+
+\begin{itemize}
+    \item Zipfian distribution, since a popular assumption is that cache workloads follow it 
+    \cite{zipf-dist-cache-1} \cite{zipf-dist-cache-2} \cite{zipf-dist-cache-3} 
+    \cite{lfu-highest-perf-zipf}.
+    \item Pareto distribution, since it has been shown that storage and internet traffic traces 
+    are well modeled by it \cite{pareto-dist-workload} \cite{pareto-dist-workload-2} 
+    \cite{pareto-dist-workload-3}.
+    \item Normal distribution; we used it less than the other distributions since it is not 
+    commonly used in cache workloads, but it was used in \cite{memory-aware-buffer-pool-manager}.
+    \item Uniform distribution; we used it less than the other distributions since it is not 
+    commonly used in cache workloads, but it was used in \cite{memory-aware-buffer-pool-manager}.
+\end{itemize}
+
+To address the problem of changing access patterns over time, in some cases, we generated data 
+using one distribution for a period of time, and then changed the distribution to another one. 
+In many cases, the distribution was the same, but we renumbered the most accessed items.
+
+To address the problem of correlated accesses, in some cases, when generating data for the 
+tenants, we generated correlated accesses to some items, causing them to be accessed together 
+during certain periods of time.
+
+To handle multi tenancy, in some cases we randomly merged the data of the tenants, and in 
+other cases we splitted the data of each tenant into chunks, and then randomly merged the
+chunks.
 
 \section{Testing and Validation}
 
