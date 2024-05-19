@@ -238,6 +238,8 @@ keep the total buffer size at 80\% of the sum of the cache size recommendations 
 
 Minimum and maximum buffer sizes were also scaled based on the cache size recommendations.
 
+All tenant priorities were equal in this experiment.
+
 \subsection{Fault Score Experiment}
 
 In the fault score experiment, we ran the cache eviction policies in the BrightKite experiment 
@@ -249,3 +251,6 @@ section.
 
 Minimum buffer sizes, maximum buffer sizes, and total buffer size were set as described in 
 the experiments overview section.
+
+Tenant priorities were set depending on the number of accesses of each tenant and the number of
+unique items of each tenant.
