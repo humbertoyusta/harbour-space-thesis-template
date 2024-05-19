@@ -30,7 +30,7 @@ check-ins as item or page accesses.
 
 Similar to the work done by Thodoris Lykouris and Sergei Vassilvitskii in \cite{datasets-reference},
 we selected the top users where the optimal cache algorithm (Belady's or clairvoyant) had more cache 
-faults, to select the most challenging instances from the dataset.
+faults, to select the most challenging users from the dataset.
 
 Then we created 6 instances of the multi-tenant caching problem, by considering each of the most 
 challenging users as a tenant, the locations as items to be cached, and the check-ins as item accesses.
@@ -46,9 +46,12 @@ The number of accesses per user is from 1300 to 2100, with most of them having 2
 unique items per user is from 300 to 1300, with many of them having around 600. The number of cache
 faults for the optimal cache algorithm is from 10 to 164, with most of them having around 20 or 30.
 
-To make the cache size recommendations per tenant, we started by some initial value, and kept increasing 
-it until the number of cache faults for the optimal cache algorithm was less than some threshold, in this
-case 40.
+The cache size recommendations for each tenant started at 40 and kept increasing by 10 until 
+the number of extra cache faults for the optimal cache algorithm using a buffer size of the 
+recommendation was less than 40.
+
+The number of extra cache faults is the number of cache faults minus the number of unique items accessed, 
+since the first access of each item is always a cache fault.
 
 \subsection{CitiBike Data}
 
@@ -59,7 +62,7 @@ in which each ride is a cache item access. Experiments were made with monthly da
 the dataset is publicly available at \cite{citibike-data}.
 
 The dataset contains information about each trip, the start and end station IDs, if the bike
-was electric or classic, data about the rider, if the rider is a member or a casual rider, 
+was electric or classic, if the rider is a member or a casual rider, 
 the start date and time that was used to sort the data, and more information not used in the 
 experiments.
 
@@ -78,16 +81,14 @@ We made three experiments:
     \item In the first one, we considered the pair (start\_station\_id, end\_station\_id) to be 
     the items to be cached, so that two trips are only considered the same if they have the 
     same start and end stations.
-    \item In the second one, we ranked start stations to numbers from 1 to the number of unique
-    start stations, and end stations to numbers from 1 to the number of unique end stations, so
-    and then considered the pair $(\lfloor \frac{start\_station\_rank}{5} \rfloor, \lfloor \frac{end\_station\_rank}{5} \rfloor)$ 
+    \item In the second one, we numbered start stations from 1 to the number of unique start 
+    stations, and end stations from 1 to the number of unique end stations, and then considered 
+    the pair \(\left(\lfloor \frac{\text{start\_station\_rank}}{5} \rfloor, \lfloor \frac{\text{end\_station\_rank}}{5} \rfloor\right)\) 
     to be the items to be cached.
     \item In the third one, we considered the start station ID to be the item to be cached.
 \end{itemize}
 
 The number of unique items and number of accesses in each experiment is shown on the following tables.
-
-\newpage
 
 \begin{table}[ht]
     \centering
@@ -113,13 +114,19 @@ The number of unique items and number of accesses in each experiment is shown on
     \label{tab:citibike-exp-3-case-4-summary}
 \end{table}
 
-To make the cache size recommendations per tenant, we started by some initial value selected differently
-for each experiment, based on the number of unique items and number of accesses, and kept increasing it 
-until the number of cache faults for the optimal cache algorithm was less than some threshold, based 
-on percentage of the number of accesses.
+% \newpage
+
+The cache size recommendations for each tenant started at 5000, 2000, and 50 in the first, 
+second, and third experiments, respectively, and kept increasing by 1000, 400, and 10 until 
+the extra cache fault ratio for the optimal cache algorithm using a buffer size of the 
+recommendation was less than 20\%, 10\%, and 5\%, respectively.
+
+The extra cache fault ratio is the number of extra cache faults divided by the number of extra 
+accesses, where the number of extra cache faults is the number of cache faults minus the number 
+of unique items accessed, and the number of extra accesses is the number of accesses minus the 
+number of unique items accessed.
 
 \subsection{Random Data}
-
 
 \subsubsection{Overview}
 
@@ -190,66 +197,55 @@ eviction policy was correctly implemented and worked as expected.
 
 \section{Experiments}
 
+\subsection{Overview}
+
+For each experiment type, we ran each cache eviction policy, using the fault ratio with 
+cache used tenant selection policy on the following datasets:
+
+\begin{itemize}
+    \item BrightKite experiment data.
+    \item CitiBike 1st experiment data.
+    \item CitiBike 2nd experiment data.
+    \item CitiBike 3rd experiment data.
+\end{itemize}
+
+The minimum buffer size per tenant was set to 40\% of the cache size recommendation, and the
+maximum buffer size per tenant was set to 250\% of the cache size recommendation for the 
+BrightKite experiment, and 220\% of the cache size recommendation for the CitiBike experiments.
+
+The total buffer size was set to 80\% of the sum of the cache size recommendations for each 
+tenant.
+
 \subsection{Hit Ratio Per Cache Size Experiment}
+
+In the hit ratio per cache size experiment, we ran the cache eviction policies with 10 different
+cache sizes, and computed the hit ratio for each cache size and tenant.
+
+The cache sizes used per experiment were:
+
+\begin{itemize}
+    \item BrightKite experiment: 50, 75, 100, 125, 150, 175, 200, 225, 250, 275.
+    \item CitiBike 1st experiment: 4000, 8000, 12000, 16000, 20000, 24000, 28000, 32000, 36000, 40000.
+    \item CitiBike 2nd experiment: 3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000, 30000.
+    \item CitiBike 3rd experiment: 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000.
+\end{itemize}
+
+These sizes were selected based on the number of unique items and the number of accesses, as 
+well as the number of cache faults for the optimal cache algorithm.
+
+The cache size recommendations for each tenant were scaled based on the total buffer size to 
+keep the total buffer size at 80\% of the sum of the cache size recommendations for each tenant.
+
+Minimum and maximum buffer sizes were also scaled based on the cache size recommendations.
 
 \subsection{Fault Score Experiment}
 
-\lipsum[1-3]
+In the fault score experiment, we ran the cache eviction policies in the BrightKite experiment 
+and in the three CitiBike experiments, and computed the penalty function score (fault score) 
+for each cache eviction policy in each experiment.
 
-\lipsum[1-1] \ref{fig:figA-1}
+The cache size recommendations for each tenant were set as described in the dataset processing 
+section.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.3  \textwidth]{dummy.png}
-    \caption{Lorem ipsum dolor sit amet}
-    \label{fig:figA-3}
-\end{figure}
-
-\lipsum[1-1] \ref{fig:figB-1}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.3\textwidth]{dummy.png}
-    \caption{Lorem ipsum dolor sit amet}
-    \label{fig:figB-3}
-\end{figure}
-
-
-\lipsum[1-1] \cite{reference-1}
-
-
-\lipsum[1-1] \cite{reference-2}
-
-
-\lipsum[1-1] \cite{reference-3}
-
-
-\begin{table}[ht!]
-    \centering
-    \begin{tabular}{c c c}
-        \hline
-        Column 1 & Column 2 & Column 3 \\
-        \hline
-        Item 1   & Item 2   & Item 3   \\
-    \end{tabular}
-    \caption{Lorem ipsum dolor sit amet}
-    \label{tab:tabA-3}
-\end{table}
-
-\lipsum[1-1] \ref{tab:tabA-1}
-
-\begin{table}[ht!]
-    \centering
-    \begin{tabular}{c c c}
-        \hline
-        Column 1 & Column 2 & Column 3 \\
-        \hline
-        Item 1   & Item 2   & Item 3   \\
-    \end{tabular}
-    \caption{Lorem ipsum dolor sit amet}
-    \label{tab:tabB-3}
-\end{table}
-
-\lipsum[1-1] \ref{tab:tabB-1}
-
-\lipsum[1-2]
+Minimum buffer sizes, maximum buffer sizes, and total buffer size were set as described in 
+the experiments overview section.
