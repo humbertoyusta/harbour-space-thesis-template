@@ -1,4 +1,4 @@
-\chapter{Expermients and Methodology}
+\chapter{Expermients and Results}
 
 \section{Introduction}
 
@@ -240,6 +240,101 @@ Minimum and maximum buffer sizes were also scaled based on the cache size recomm
 
 All tenant priorities were equal in this experiment.
 
+\subsubsection*{Results in BrightKite Dataset}
+
+The hit ratio per cache size per tenant for the BrightKite dataset is shown in Figure 
+\ref{fig:hit_ratio_per_cache_size_exp_brightkite}.
+
+The penalty function score (fault score) per cache size for the BrightKite dataset 
+is shown in Table \ref{tab:fault-score-per-buffer-size-brightkite}.
+
+By comparing LRU with Fault Ratio with Cache Used Policy (LRU in Figure and Table) with LRU 
+using Naive Policy (NaiveLRU in Figure and Table), we observe that the Fault Ratio with Cache 
+Used Policy improves with a higher cache size, performing similarly or worse with smaller cache 
+sizes, but better with larger cache sizes, outperforming the NaiveLRU policy for all tenants 
+after a cache size of 125.
+
+We observe that most of the cache eviction policies perform well with the Fault Ratio with 
+Cache Used Policy, many of them outperforming separate or naive LRU policies with a 20\% 
+higher cache size (since they show a 0 penalty score) for different cache sizes.
+
+LRU-2, LIRS, and MQ perform particularly well, showing a 0 penalty score for all cache sizes of 
+125 or higher and high hit ratios for all tenants. LIRS results are particularly interesting 
+since it is a low-overhead policy, and LRU-2 is performing very well.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{hit_ratio_per_cache_size_exp_brightkite.png}
+    \caption{Hit ratio per cache size per tenant for the BrightKite dataset}
+    \label{fig:hit_ratio_per_cache_size_exp_brightkite}
+\end{figure}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Penalty function score (fault score) per cache size for the BrightKite dataset}
+    \csvautotabular{data/fault_score_per_buffer_size_brightkite.csv}
+    \label{tab:fault-score-per-buffer-size-brightkite}
+\end{table}
+
+\subsubsection*{Results in CitiBike Dataset}
+
+The hit ratio per cache size per tenant for the first experiment with the CitiBike dataset is
+shown in Figure \ref{fig:hit_ratio_per_cache_size_exp_citibike}.
+
+The penalty function score (fault score) per cache size for the first, second and third 
+experiments with the CitiBike dataset are shown in Tables 
+\ref{tab:fault-score-per-buffer-size-citibike}, \ref{tab:fault-score-per-buffer-size-citibike-2}
+and \ref{tab:fault-score-per-buffer-size-citibike-3} respectively.
+
+In the first experiment, we observe that most of the cache eviction policies perform very 
+well with the Fault Ratio with Cache Used Policy, many of them outperforming separate or 
+naive LRU  policies with a 20\% higher cache size (since they show a 0 penalty score) for 
+different cache sizes.
+
+In other experiments, results are not as good as in the first experiment, still showing
+good results and low penalty scores with several cache eviction policies.
+
+LFU, LRU-2, LIRS, and MQ perform particularly well, showing a 0 penalty score for most cache 
+sizes. LIRS results are particularly interesting since it is a low-overhead policy, 
+and LFU is performing very well. 
+
+Note that even though LFU is performing very well in this dataset, it is not practical in some 
+real-world scenarios since it suffers greatly from access pattern changes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{hit_ratio_per_cache_size_exp_citibike.png}
+    \caption{Hit ratio per cache size per tenant for the CitiBike dataset (first experiment)}
+    \label{fig:hit_ratio_per_cache_size_exp_citibike}
+\end{figure}
+
+\newpage
+
+\begin{table}[ht]
+    \centering
+    \small
+    \caption{Penalty function score (fault score) per cache size for the CitiBike dataset (first experiment)}
+    \csvautotabular{data/fault_score_per_buffer_size_citibike_1.csv}
+    \label{tab:fault-score-per-buffer-size-citibike}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \small
+    \caption{Penalty function score (fault score) per cache size for the CitiBike dataset (second experiment)}
+    \csvautotabular{data/fault_score_per_buffer_size_citibike_2.csv}
+    \label{tab:fault-score-per-buffer-size-citibike-2}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \small
+    \caption{Penalty function score (fault score) per cache size for the CitiBike dataset (third experiment)}
+    \csvautotabular{data/fault_score_per_buffer_size_citibike_3.csv}
+    \label{tab:fault-score-per-buffer-size-citibike-3}
+\end{table}
+
 \subsection{Fault Score Experiment}
 
 In the fault score experiment, we ran the cache eviction policies in the BrightKite experiment 
@@ -254,3 +349,26 @@ the experiments overview section.
 
 Tenant priorities were set depending on the number of accesses of each tenant and the number of
 unique items of each tenant.
+
+\subsubsection*{Results}
+
+The penalty function score (fault score) per dataset on the Fault Score Experiment is shown in
+Table \ref{tab:fault-score-per-experiment-dataset}.
+
+We observe that LRU solution outperforms NaiveLRU solution for all datasets in the penalty 
+function score (fault score) metric, showcasing the positive impact of the Fault Ratio with
+Cache Used Policy.
+
+LIRS, LRU-2 and MQ solutions perform particularly well in general accross all datasets.
+
+Overall the results are very good, showcasing that it is possible to achieve a low fault score
+with the proposed solution achieving similar results to the baseline solution with a 20\% higher
+cache size.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Penalty function score (fault score) per dataset}
+  \csvautotabular{data/fault_score_per_solution_per_experiment.csv}
+  \label{tab:fault-score-per-experiment-dataset}
+\end{table}
