@@ -2,9 +2,10 @@
 
 \section{Introduction}
 
-This section describes the experiments and methodology used to evaluate the proposed solutions. 
-The experiments were conducted on two different datasets: BrightKite and CitiBike, which are 
-real-world datasets, and we included a synthetic dataset for parameter tuning.
+This section describes the experiments, the methodology used to evaluate the proposed
+solutions, and the obtained results. The experiments were conducted on two real-world
+datasets: BrightKite and CitiBike. Additionally, a synthetic dataset was included for
+parameter tuning.
 
 \section{Datasets}
 
@@ -209,9 +210,9 @@ cache used tenant selection policy on the following datasets:
     \item CitiBike 3rd experiment data.
 \end{itemize}
 
-The minimum buffer size per tenant was set to 40\% of the cache size recommendation, and the
-maximum buffer size per tenant was set to 250\% of the cache size recommendation for the 
-BrightKite experiment, and 220\% of the cache size recommendation for the CitiBike experiments.
+The minimum buffer size per tenant was set to 40\% of the cache size recommendation. For the 
+BrightKite experiment, the maximum buffer size per tenant was set to 250\% of the cache size 
+recommendation, and for the CitiBike experiments, it was set to 220\%.
 
 The total buffer size was set to 80\% of the sum of the cache size recommendations for each 
 tenant.
