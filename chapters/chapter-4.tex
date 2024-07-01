@@ -2,8 +2,60 @@
 
 \section{Conclusions}
 
-\lipsum[1-3]
+Assuming reasonable seasonality recommendations for cache size per tenant, the proposed 
+dynamic approach can achieve good results in enhancing cache performance and ensuring fair 
+distribution among tenants in a multi-tenant environment.
+
+The Fault Ratio with Cache Used Policy as a tenant selection policy, combined with different 
+cache eviction policies, achieves comparable results to the baseline LRU solution with a 20\% 
+higher cache size.
+
+Several eviction policies were adapted to the multi-tenant dynamic cache environment and 
+combined with the tenant selection policy. The adapted eviction policies were LRU, LFU, LRU-2, 
+LIRS, 2Q, MQ, and LRFU. The LRU-2, LIRS, and MQ eviction policies consistently demonstrated 
+strong performance across various datasets, outperforming classical LRU and LFU policies.
+
+Experiments with real-world datasets, such as Brightkite and CitiBike, validated the 
+robustness and versatility of the proposed solutions.
+
+Proper hyperparameter tuning is crucial for achieving optimal performance. However, several 
+solutions demonstrated strong performance across various datasets, both synthetic and 
+real-world, using the same hyperparameters. The parameter tuning process was not overly 
+complex, achieving good results with a very limited number of iterations.
 
 \section{Recommendations}
 
-\lipsum[1-1] \ref{fig:figA-1}
+The main focus on this thesis was on the performance of the proposed solutions after the 
+seasonality recommendation was assumed. Future work should focus on evaluating the solution 
+together with the seasonality recommendation algorithm. This will provide a more comprehensive
+evaluation of the proposed solutions and their performance in real-world scenarios.
+
+While the proposed solutions were evaluated using real-world datasets, these datasets were not 
+multi-tenant caching problems in nature. Although these evaluations demonstrated 
+the robustness and versatility of the proposed solutions, future work should focus on testing 
+them within the specific context of multi-tenant caching problems. This can be achieved by 
+using datasets from multi-tenant databases or applications to ensure more accurate and 
+relevant assessments.
+
+Synthetic data was added to facilitate generalized hyperparameter tuning due to the limited 
+number of different real-world datasets. With a greater variety of real-world datasets, the 
+need for synthetic datasets could be minimized or avoided altogether.
+
+The main tenant selection policy used in this thesis was the Fault Ratio with Cache Used Policy. 
+While other tenant selection policies were considered and tested, different approaches could be 
+explored in future research.
+
+Several eviction policies were adapted to the multi-tenant dynamic cache environment, but some 
+policies, like ARC, are not trivial to adapt. Exploring approaches to adapt these policies or 
+finding similar policies that can be adapted is an important area for further investigation.
+
+No machine learning solutions were evaluated as cache eviction policies in this thesis; 
+however, they could be an interesting approach to explore in future research.
+
+2Q eviction policy did not perform well in the experiments, while \cite{2q-article} claims to 
+achieve similar results to LRU-2, which was one of the best-performing eviction policies in
+this thesis. This discrepancy could be due to the adaptation of the eviction policy to the
+multi-tenant environment, specific implementation details, parameter tuning, or the datasets
+used in the experiments. Further investigation is needed to understand the reasons behind this
+discrepancy.
+
