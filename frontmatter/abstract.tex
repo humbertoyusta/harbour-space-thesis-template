@@ -2,4 +2,23 @@
 
 \vspace{0.5cm}
 
-\lipsum[1-2]
+In this thesis, we study the problem of how to effectively share the buffer pool memory in a 
+multi-tenant caching problem, proposing a dynamic buffer allocation approach that aims to 
+minimize the fault rate of the cache while ensuring fairness among tenants and avoiding 
+waste of resources, assuming that we can have reasonable seasonality recommendations for 
+the cache size of each tenant.
+
+We propose a general caching algorithm that can be used with different tenant selection 
+policies and cache eviction policies. Additionally, we propose a tenant selection policy 
+based on the cache fault rate and compare it to a baseline naive tenant selection policy 
+based on the cache size recommendations.
+
+We adapt several eviction policies to the multi-tenant scenario, analyzing and comparing 
+their performance when combined with our tenant selection policy. The eviction policies 
+considered are LRU, LFU, LRU-2, 2Q, MQ, LIRS, and LRFU, with LRU-2, LIRS, and MQ 
+demonstrating the best results.
+
+We evaluate our solutions on two real-world datasets, Brightkite and CitiBike, demonstrating 
+the robustness and versatility of our approach. We aim to generalize the results by using 
+the same hyperparameters across different datasets and performing minimal hyperparameter 
+tuning.
