@@ -1,11 +1,24 @@
-\chapter{Appendix 2}
-\label{appendix:appendix2}
+\chapter{Source Code}
+\label{appendix:source-code}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.3  \textwidth]{dummy.png}
-    \caption{Lorem ipsum dolor sit amet}
-    \label{fig:figAppendix-2}
-\end{figure}
+The source code for the experiments conducted in this thesis is available on GitHub at the 
+following URL: \url{https://github.com/humbertoyusta/buffer-sharing-in-multi-tenant-db}.
 
-\lipsum[1-1] \ref{fig:figAppendix-2}
+The repository contains:
+
+\begin{itemize}
+  \item The code for data preprocessing, creation of the test cases used in the experiments, 
+  and for hyper-parameter tuning.
+  \item The code for the tenant selection policy, eviction policies, the baselines, and the 
+  optimal cache algorithm for comparison.
+  \item The code for running the experiments and performing hyper-parameter tuning based on 
+  the test cases created and the eviction policies and tenant selection policies implemented.
+  \item The final hyper-parameters used in the experiments.
+  \item Experiment results, including plots, tables, and logs.
+  \item The code to process the experiment results and generate the plots and tables used in 
+  this thesis.
+\end{itemize}
+
+More details on the repository structure and the code can be found in the 
+\href{https://github.com/humbertoyusta/buffer-sharing-in-multi-tenant-db/blob/main/README.md}{README file}
+in the repository.
