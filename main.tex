@@ -46,34 +46,34 @@
 \pagenumbering{gobble}
 \input{frontmatter/frontmatter-list.tex}
 
-\cleardoublepage
+\newpage
 {
     \setstretch{0}
     \tableofcontents
 }
 
-\cleardoublepage
+\newpage
 {
     \setstretch{0}
     \listoffigures
 }
 
-\cleardoublepage
+\newpage
 {
     \setstretch{0}
     \listoftables
 }
 
-\cleardoublepage
+\newpage
 \pagenumbering{arabic}
 \input{chapters/chapters-list.tex}
 
-\cleardoublepage
+\newpage
 \nocite{*}
 \printbibliography
 \addcontentsline{toc}{chapter}{Bibliography}
 
-\cleardoublepage
+\newpage
 \appendix
 \input{appendix/appendix-list.tex}
 
