@@ -115,15 +115,15 @@ the recommendation) should be evicted.
 The evicted tenant $t$ is the one that minimizes the following formula:
 
 $$
-\left( \frac{\text{Solution Cache faults}_t - \text{LRU Cache faults}_t}{\text{LRU Cache faults}_t} \right) ^2 \text{Priority}_t \, \cdot \, \text{sgn}( \text{Solution Cache faults}_t - \text{LRU Cache faults}_t )
+\left( \frac{s_t - b_t}{b_t} \right) ^2 \cdot p_t \, \cdot \, \text{sgn}( s_t - b_t )
 $$
 
 Where:
 
 \begin{itemize}
-    \item $\text{Solution Cache faults}_t$ --- is the number of faults of the tenant in the cache of the promised size (or $x\%$ bigger than the recommendation).
-    \item $\text{LRU Cache faults}_t$ --- is the number of faults of the tenant in a LRU cache of the promised size (or $x\%$ bigger than the recommendation).
-    \item $\text{Priority}_t$ --- is the priority of the tenant.
+    \item $s_t$ --- is the number of faults of the tenant in the current solution that is being evaluated.
+    \item $b_t$ --- is the number of faults of the tenant in a LRU cache of the promised size (or $x\%$ bigger than the recommendation).
+    \item $p_t$ --- is the priority of the tenant.
     \item $\text{sgn}(x)$ --- is the sign function, returning $1$ if $x > 0$, $-1$ if $x < 0$ and $0$ if $x = 0$.
 \end{itemize}
 
@@ -152,15 +152,15 @@ it uses the hits of the tenants in the cache of the promised size (or $x\%$ bigg
 The evicted tenant $t$ is the one that minimizes the following formula:
 
 $$
-\left( \frac{\text{LRU Cache hits}_t - \text{Solution Cache hits}_t}{\text{LRU Cache hits}_t} \right) ^2 \text{Priority}_t \, \cdot \, \text{sgn}( \text{LRU Cache hits}_t - \text{Solution Cache hits}_t )
+\left( \frac{l_t - h_t}{l_t} \right) ^2 \cdot p_t \, \cdot \, \text{sgn}( l_t - h_t )
 $$
 
 Where:
 
 \begin{itemize}
-    \item $\text{Solution Cache hits}_t$ --- is the number of hits of the tenant in the cache of the promised size (or $x\%$ bigger than the recommendation).
-    \item $\text{LRU Cache hits}_t$ --- is the number of hits of the tenant in a LRU cache of the promised size (or $x\%$ bigger than the recommendation).
-    \item $\text{Priority}_t$ --- is the priority of the tenant.
+    \item $h_t$ --- is the number of hits of the tenant in the current solution that is being evaluated.
+    \item $l_t$ --- is the number of hits of the tenant in a LRU cache of the promised size (or $x\%$ bigger than the recommendation).
+    \item $p_t$ --- is the priority of the tenant.
     \item $\text{sgn}(x)$ --- is the sign function, returning $1$ if $x > 0$, $-1$ if $x < 0$ and $0$ if $x = 0$.
 \end{itemize}
 
@@ -184,18 +184,18 @@ promised size (or $x\%$ bigger than the recommendation).
 The evicted tenant $t$ is the one that minimizes the following formula:
 
 $$
-\frac{ \left( \frac{\text{Solution Cache faults}_t - \text{LRU Cache faults}_t}{\text{LRU Cache faults}_t} \right) ^2 \text{Priority}_t \, \cdot \, \text{sgn}( \text{Solution Cache faults}_t - \text{LRU Cache faults}_t ) }{ \left( \frac{\text{Cache Used}_t}{\text{LRU Base Cache Size}_t} \right) ^2 }
+\frac{ \left( \frac{s_t - b_t}{b_t} \right) ^2 \cdot p_t \, \cdot \, \text{sgn}( s_t - b_t ) }{ \left( \frac{c_t}{d_t} \right) ^2 }
 $$
 
 Where:
 
 \begin{itemize}
-    \item $\text{Solution Cache faults}_t$ --- is the number of faults of the tenant in the cache of the promised size (or $x\%$ bigger than the recommendation).
-    \item $\text{LRU Cache faults}_t$ --- is the number of faults of the tenant in a LRU cache of the promised size (or $x\%$ bigger than the recommendation).
-    \item $\text{Priority}_t$ --- is the priority of the tenant.
+    \item $s_t$ --- is the number of faults of the tenant in the current solution that is being evaluated.
+    \item $b_t$ --- is the number of faults of the tenant in a LRU cache of the promised size (or $x\%$ bigger than the recommendation).
+    \item $p_t$ --- is the priority of the tenant.
     \item $\text{sgn}(x)$ --- is the sign function, returning $1$ if $x > 0$, $-1$ if $x < 0$ and $0$ if $x = 0$.
-    \item $\text{Cache Used}_t$ --- is the number of pages currently in the cache of the tenant.
-    \item $\text{LRU Base Cache Size}_t$ --- is the size of the LRU cache of the promised size (or $x\%$ bigger than the recommendation) for the tenant.
+    \item $c_t$ --- is the number of pages currently in the cache of the tenant.
+    \item $d_t$ --- is the size of the LRU cache of the promised size (or $x\%$ bigger than the recommendation) for the tenant.
 \end{itemize}
 
 The modification in this policy comes from the idea that if a tenant is using more cache
@@ -225,8 +225,12 @@ from the cache of the promised size (or $x\%$ bigger than the recommendation) (i
 The evicted tenant $t$ is the one that minimizes the following formula:
 
 $$
-\frac{ \text{Cache Used}_t }{ \text{LRU Base Cache Size}_t }
+\frac{ c_t }{ d_t }
 $$
+
+Where $c_t$ is the number of pages currently in the cache of the tenant, and
+$d_t$ is the size of the LRU cache of the promised size (or $x\%$ bigger than
+the recommendation) for the tenant.
 
 In case of a tie (each tenant has the number of pages in the cache with the same 
 proportion to the recommendation), we will evict from the same tenant of the page that 

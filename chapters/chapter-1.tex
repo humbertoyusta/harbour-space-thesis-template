@@ -150,19 +150,21 @@ Minimum and maximum buffer sizes can be defined based on the buffer size recomme
 for example, the minimal buffer size can be 40\% of the recommendation, and the maximal buffer size
 can be 250\% of the recommendation.
 
+\newpage
+
 \section{Penalty Function Optimization}
 
 We will consider the following penalty function to optimize:
 
 $$
-\sum_{t \in \text{Tenants}} \left( \frac{\text{Solution Cache faults}_t - \text{LRU Cache faults}_t}{\text{LRU Cache faults}_t} \right) ^2 \text{Priority}_t \left[\text{Solution Cache faults}_t \geq \text{LRU Cache faults}_t\right]
+\sum_{t \in \text{Tenants}} \left( \frac{s_t - b_t}{b_t} \right) ^2 \cdot p_t \cdot \left[s_t \geq b_t\right]
 $$
 
 In which, for each tenant $t$:
 \begin{itemize}
-    \item $\text{Solution Cache faults}_t$ is the number of cache faults of the eviction policy we are testing.
-    \item $\text{LRU Cache faults}_t$ is the number of cache faults of the LRU eviction policy if we had a dedicated cache of some promised size.
-    \item $\text{Priority}_t$ is the priority of the tenant, which can be defined in terms of the cost of a cache fault for the tenant, or the importance of the tenant. If there is no need to prioritize tenants, we can set $\text{Priority}_t = 1$ for all tenants, in case it is needed, priorities can be defined based on how importanat is for each tenant to achieve the promised hit ratio.
+    \item $s_t$ is the number of cache faults of the eviction policy we are testing.
+    \item $b_t$ is the number of cache faults of the LRU eviction policy if we had a dedicated cache of some promised size.
+    \item $p_t$ is the priority of the tenant, which can be defined in terms of the cost of a cache fault for the tenant, or the importance of the tenant. If there is no need to prioritize tenants, we can set $p_t = 1$ for all tenants, in case it is needed, priorities can be defined based on how importanat is for each tenant to achieve the promised hit ratio.
     \item The term in brackets is a condition so we only penalize the eviction policy if it has more cache faults than the isolated LRU eviction policy.
 \end{itemize}
 
@@ -212,7 +214,7 @@ To address the research question, the following objectives are proposed:
 The outline for the rest of the thesis is as follows:
 
 \begin{itemize}
-    \item \textbf{Chapter 2: Algorithm Overview} - Will describe the base algorithm that we used, and discuss possible tenant selection and cache eviction policies.
-    \item \textbf{Chapter 3: Experiments and Results} - Will describe the datasets we used, with data collection and processing part, the performed experiments and the results.
+    \item \textbf{Chapter 2: Algorithm Overview} - Will describe the base algorithm that we used, and discuss tenant selection and cache eviction policies.
+    \item \textbf{Chapter 3: Experiments and Results} - Will describe the datasets we used, including the data collection and processing parts, the performed experiments, and the results.
     \item \textbf{Chapter 4: Conclusions and Recommendations} - Will summarize the results and propose recommendations for future work.
 \end{itemize}
